@@ -246,6 +246,12 @@
   'use strict';
 
   var W = 1600, H = 1000;
+
+  var GEO = { wires: [], terms: [], bodies: [] };
+  function geoReset() { GEO = { wires: [], terms: [], bodies: [] }; }
+  function geoTerm(x, y) { GEO.terms.push([x, y]); return [x, y]; }
+  function geoBody(b) { GEO.bodies.push(b); }
+
   var C = {
     bg: '#000000', wire: '#E6E6E6', metal: '#9C9C9C', dim: '#6E6E6E', deep: '#3E3E3E',
     pos: '#E06A96', posL: '#F4A8C6', neg: '#0E8A96', negL: '#33C2DC',
@@ -271,6 +277,7 @@
     ctx.restore();
   }
   function poly(ctx, pts, color, w, dash) {
+    GEO.wires.push(pts.map(function (p) { return [p[0], p[1]]; }));
     ctx.save();
     ctx.strokeStyle = color; ctx.lineWidth = w || 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (dash) ctx.setLineDash(dash);
@@ -346,6 +353,8 @@
   }
 
   function batteryV(ctx, x, y, label, emf, sub) {
+    geoTerm(x, y - 74); geoTerm(x, y + 70);
+    geoBody({ type: 'rect', x: x - 36, y: y - 28, w: 72, h: 52 });
     line(ctx, x, y - 74, x, y - 26, C.wire, 3.2);
     line(ctx, x, y + 22, x, y + 70, C.wire, 3.2);
     line(ctx, x - 34, y - 26, x + 34, y - 26, C.pos, 6);
@@ -356,8 +365,22 @@
     if (emf != null) txt(ctx, x + 48, y - 4, emf, C.white, 16, 700, 'left');
     if (sub) txt(ctx, x - 50, y + 30, sub, C.dim, 14, 400, 'right');
   }
+
+  function batteryPic(ctx, x, y, label, emf) {
+    line(ctx, x, y - 74, x, y - 26, C.wire, 3.2);
+    line(ctx, x, y + 22, x, y + 70, C.wire, 3.2);
+    line(ctx, x - 34, y - 26, x + 34, y - 26, C.pos, 6);
+    line(ctx, x - 19, y + 22, x + 19, y + 22, C.neg, 6);
+    txt(ctx, x + 46, y - 28, '+', C.pos, 20, 700);
+    txt(ctx, x + 46, y + 24, '−', C.neg, 20, 700);
+    if (label) txt(ctx, x - 50, y - 4, label, C.sub, 16, 600, 'right');
+    if (emf != null) txt(ctx, x + 48, y - 4, emf, C.white, 16, 700, 'left');
+  }
+
   function resistorV(ctx, x, y, h, label, color) {
     var w = 46;
+    geoTerm(x, y - h / 2); geoTerm(x, y + h / 2);
+    geoBody({ type: 'rect', x: x - w / 2, y: y - h / 2, w: w, h: h });
     ctx.save();
     ctx.fillStyle = '#0a0a0a'; ctx.strokeStyle = color || C.wire; ctx.lineWidth = 2.8;
     rrect(ctx, x - w / 2, y - h / 2, w, h, 6); ctx.fill(); ctx.stroke();
@@ -366,6 +389,8 @@
   }
   function resistorH(ctx, x, y, w, label, color) {
     var h = 44;
+    geoTerm(x - w / 2, y); geoTerm(x + w / 2, y);
+    geoBody({ type: 'rect', x: x - w / 2, y: y - h / 2, w: w, h: h });
     ctx.save();
     ctx.fillStyle = '#0a0a0a'; ctx.strokeStyle = color || C.wire; ctx.lineWidth = 2.8;
     rrect(ctx, x - w / 2, y - h / 2, w, h, 6); ctx.fill(); ctx.stroke();
@@ -374,6 +399,8 @@
   }
 
   function lamp(ctx, x, y, r, P, P0, name) {
+    geoTerm(x, y - r); geoTerm(x, y + r);
+    geoBody({ type: 'circle', x: x, y: y, r: r });
     var k = Math.max(0, Math.min(1.25, P / (P0 || 4.5)));
     var a = Math.min(0.92, 0.05 + 0.9 * k);
     ctx.save();
@@ -398,7 +425,10 @@
     ctx.restore();
     if (name) txt(ctx, x, y + r + 30, name, C.sub, 15, 600, 'center');
   }
+
   function meterCircle(ctx, x, y, r, letter, color) {
+    geoTerm(x, y - r); geoTerm(x, y + r);
+    geoBody({ type: 'circle', x: x, y: y, r: r });
     ctx.save();
     ctx.fillStyle = '#0A0A0A'; ctx.strokeStyle = color || C.wire; ctx.lineWidth = 2.6;
     ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -428,11 +458,54 @@
     return v.toFixed(n == null ? 2 : n);
   }
 
+  function meterH(ctx, x, y, r, letter, color) {
+    geoTerm(x - r, y); geoTerm(x + r, y);
+    geoBody({ type: 'circle', x: x, y: y, r: r });
+    ctx.save();
+    ctx.fillStyle = '#0A0A0A'; ctx.strokeStyle = color || C.wire; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    txt(ctx, x, y + 1, letter, color || C.white, r * 0.95, 700, 'center');
+  }
+
+  function switchH(ctx, x0, x1, y, closed, name) {
+    geoTerm(x0, y); geoTerm(x1, y);
+    geoBody({ type: 'rect', x: x0, y: y - 46, w: x1 - x0, h: 60 });
+    line(ctx, x0, y, x0 + (x1 - x0) * 0.18, y, C.wire, 3.6);
+    line(ctx, x1 - (x1 - x0) * 0.18, y, x1, y, C.wire, 3.6);
+    ctx.save();
+    ctx.strokeStyle = C.wire; ctx.lineWidth = 3.6; ctx.lineCap = 'round';
+    ctx.beginPath();
+    if (closed) { ctx.moveTo(x0 + (x1 - x0) * 0.18, y); ctx.lineTo(x1 - (x1 - x0) * 0.18, y); }
+    else { ctx.moveTo(x0 + (x1 - x0) * 0.18, y); ctx.lineTo(x1 - (x1 - x0) * 0.10, y - 44); }
+    ctx.stroke();
+    ctx.restore();
+    dot(ctx, x0 + (x1 - x0) * 0.18, y, 5, C.wire);
+    dot(ctx, x1 - (x1 - x0) * 0.18, y, 5, C.wire);
+    if (name) txt(ctx, (x0 + x1) / 2, y - 66, name, C.sub, 15, 700, 'center');
+  }
+
+  function curve(ctx, pts, color, w, dash) {
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = w || 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath();
+    for (var i = 0; i < pts.length; i++) { if (i) ctx.lineTo(pts[i][0], pts[i][1]); else ctx.moveTo(pts[i][0], pts[i][1]); }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function wire(ctx, a, b, w) {
+    poly(ctx, [a, b], C.wire, w || 3.6);
+  }
+
   g.RENDER = { W: W, H: H, C: C, fmt: fmt, panel: null, scenes: {} };
+  g.RENDER.geo = { reset: geoReset, data: function () { return GEO; } };
   g.RENDER.U = {
     rrect: rrect, line: line, poly: poly, txt: txt, mono: mono, dot: dot, arrow: arrow,
     flow: flow, batteryV: batteryV, resistorV: resistorV, resistorH: resistorH, lamp: lamp,
-    meterCircle: meterCircle, axis: axis, grid: grid, cap: cap
+    meterCircle: meterCircle, meterH: meterH, switchH: switchH, wire: wire, curve: curve, batteryPic: batteryPic,
+    axis: axis, grid: grid, cap: cap
   };
 })(window);
 </script>
@@ -447,6 +520,35 @@
     if (sub) U.txt(ctx, 60, 100, sub, C.sub, 17, 400);
   }
   function panel(o) { g.RENDER.panel = o; }
+
+  var K = {
+    bat: function (ctx, x, y, label, emf, sub) {
+      U.batteryV(ctx, x, y, label, emf, sub);
+      return { t: [x, y - 74], b: [x, y + 70] };
+    },
+    res: function (ctx, x, y, h, label, color) {
+      U.resistorV(ctx, x, y, h, label, color);
+      return { t: [x, y - h / 2], b: [x, y + h / 2] };
+    },
+    lamp: function (ctx, x, y, r, P, P0, name) {
+      U.lamp(ctx, x, y, r, P, P0, name);
+      return { t: [x, y - r], b: [x, y + r] };
+    },
+    meterV: function (ctx, x, y, r, letter, color) {
+      U.meterCircle(ctx, x, y, r, letter, color);
+      return { t: [x, y - r], b: [x, y + r] };
+    },
+    meterH: function (ctx, x, y, r, letter, color) {
+      U.meterH(ctx, x, y, r, letter, color);
+      return { l: [x - r, y], r: [x + r, y] };
+    },
+    sw: function (ctx, x0, x1, y, closed, name) {
+      U.switchH(ctx, x0, x1, y, closed, name);
+      return { l: [x0, y], r: [x1, y] };
+    },
+
+    w: function (ctx, a, b, w) { U.poly(ctx, [a, b], C.wire, w || 3.6); }
+  };
   function tag(ctx, x, y, s, color) {
     U.txt(ctx, x, y, s, color || C.dim, 15, 600);
   }
@@ -455,38 +557,41 @@
     var n = st.n, L = P.lamps(6, 1.5, n, 4.5);
     title(ctx, '多接一盏灯，为什么每盏都变暗？', '规格相同的灯并联在同一个电池上 —— 只是灯多了几盏');
 
-    var bx = 210, by = 560, top = 300, bot = 800, x0 = 430, x1 = 1180;
-    var gap = (x1 - x0) / n;
+    var bx = 230, by = 560, top = 350, bot = 790;
+    var x0 = 520, step = 210, lastX = x0 + step * (n - 1);
 
-    U.poly(ctx, [[bx, by - 74], [bx, top], [x1, top]], C.wire, 3.6);
-    U.poly(ctx, [[bx, by + 70], [bx, bot], [x1, bot]], C.wire, 3.6);
-    U.batteryV(ctx, bx, by, '电池', 'E = 6 V', 'r = 1.5 Ω');
+    var bat = K.bat(ctx, bx, by, '电池', 'E = 6 V', 'r = 1.5 Ω');
+    K.w(ctx, [bx, top], bat.t);
+    K.w(ctx, [bx, bot], bat.b);
+    K.w(ctx, [bx, top], [lastX, top]);
+    K.w(ctx, [bx, bot], [lastX, bot]);
 
-    var i, lx;
+    var i, lx, lampT = [];
     for (i = 0; i < n; i++) {
-      lx = x0 + gap * (i + 0.5);
-      U.poly(ctx, [[lx, top], [lx, by - 52]], C.wire, 3.6);
-      U.poly(ctx, [[lx, by + 52], [lx, bot]], C.wire, 3.6);
-      U.lamp(ctx, lx, by, 50, L.PL, L.P1, 'L' + (i + 1));
+      lx = x0 + step * i;
+      var lp = K.lamp(ctx, lx, by, 50, L.PL, L.P1, 'L' + (i + 1));
+      K.w(ctx, [lx, top], lp.t);
+      K.w(ctx, [lx, bot], lp.b);
       U.mono(ctx, lx, by + 116, F(L.IL, 2) + ' A', C.sub, 18, 700, 'center');
+      lampT.push(lp);
     }
     if (st.anim) {
       var sp = Math.max(.3, Math.min(1.6, L.It / 2.2));
-      U.flow(ctx, [[bx, by - 74], [bx, top], [x1, top]], st.phase * sp, C.gold, 72, 5);
-      U.flow(ctx, [[x1, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 72, 5);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [lastX, top]], st.phase * sp, C.gold, 72, 5);
+      U.flow(ctx, [[lastX, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 72, 5);
     }
 
-    var cx = 1300, cy = 700, barMax = 300, mx = Math.max(L.P1, L.PL) * 1.3;
-    tag(ctx, cx - 40, cy - 340, '每盏的功率');
+    var cx = 1270, cy = 700, barMax = 300, mx = Math.max(L.P1, L.PL) * 1.3;
+    tag(ctx, cx - 30, cy - 340, '每盏的功率');
     var bars = [[L.P1, '只有一盏', C.metal, .40], [L.PL, '现在每盏', C.gold, .95]];
     for (i = 0; i < 2; i++) {
       var hh = barMax * bars[i][0] / mx;
       ctx.save();
       ctx.fillStyle = bars[i][2]; ctx.globalAlpha = bars[i][3];
-      U.rrect(ctx, cx + i * 130, cy - hh, 90, hh, 6); ctx.fill();
+      U.rrect(ctx, cx + i * 120, cy - hh, 86, hh, 6); ctx.fill();
       ctx.restore();
-      U.mono(ctx, cx + i * 130 + 45, cy - hh - 26, F(bars[i][0], 2) + ' W', C.white, 18, 700, 'center');
-      tag(ctx, cx + i * 130 + 45, cy + 30, bars[i][1], C.sub, 15, 400, 'center');
+      U.mono(ctx, cx + i * 120 + 43, cy - hh - 26, F(bars[i][0], 2) + ' W', C.white, 18, 700, 'center');
+      tag(ctx, cx + i * 120 + 43, cy + 30, bars[i][1], C.sub, 15, 400, 'center');
     }
 
     panel({
@@ -508,34 +613,42 @@
     var r2 = 0.5 + rOld, i2 = 3.0 / (4.5 + r2), P2 = i2 * i2 * 4.5;
     title(ctx, '串一节旧电池：电动势翻倍，灯反而更暗', '旧电池的电动势一样是 1.5 V，只是内阻大得多');
 
-    function one(cx, sources, Pl, name, itxt) {
-      var top = 330, bot = 720, cy = 525;
-      U.poly(ctx, [[cx - 200, top], [cx + 200, top]], C.wire, 3.6);
-      U.poly(ctx, [[cx - 200, bot], [cx + 200, bot]], C.wire, 3.6);
-      U.poly(ctx, [[cx + 200, top], [cx + 200, cy - 52]], C.wire, 3.6);
-      U.poly(ctx, [[cx + 200, cy + 52], [cx + 200, bot]], C.wire, 3.6);
-      for (var k = 0; k < sources.length; k++) {
-        var y = cy - (sources.length - 1) * 82 + k * 164;
-        U.batteryV(ctx, cx - 200, y, sources[k][0], sources[k][1], sources[k][2]);
+    function one(cx, srcs, Pl, name, itxt, I) {
+      var top = 320, bot = 760, cy = 540, lx = cx - 200, rx = cx + 200;
+      K.w(ctx, [lx, top], [rx, top]);
+      K.w(ctx, [lx, bot], [rx, bot]);
+
+      var n = srcs.length, first = null, last = null, k, y, b;
+      for (k = 0; k < n; k++) {
+        y = cy - (n - 1) * 72 + k * 144;
+        b = K.bat(ctx, lx, y, srcs[k][0], srcs[k][1], srcs[k][2]);
+        if (k === 0) first = b.t;
+        last = b.b;
       }
-      U.lamp(ctx, cx + 200, cy, 50, Pl, 4.5, null);
+      K.w(ctx, [lx, top], first);
+      K.w(ctx, [lx, bot], last);
+
+      var lp = K.lamp(ctx, rx, cy, 50, Pl, 4.5, null);
+      K.w(ctx, [rx, top], lp.t);
+      K.w(ctx, [rx, bot], lp.b);
+
       U.txt(ctx, cx, 800, name, C.white, 20, 700, 'center');
       U.txt(ctx, cx, 838, itxt, C.sub, 16, 400, 'center');
       if (st.anim) {
-        var sp = Math.max(.25, Math.min(1.3, i1 / 1.2));
-        U.flow(ctx, [[cx - 200, top], [cx + 200, top]], st.phase * sp, C.gold, 66, 4.6);
-        U.flow(ctx, [[cx + 200, bot], [cx - 200, bot]], st.phase * sp, C.gold, 66, 4.6);
+        var sp = Math.max(.25, Math.min(1.3, I / 1.2));
+        U.flow(ctx, [[lx, top], [rx, top]], st.phase * sp, C.gold, 66, 4.6);
+        U.flow(ctx, [[rx, bot], [lx, bot]], st.phase * sp, C.gold, 66, 4.6);
       }
     }
-    one(400, [['新电池', 'E = 1.5 V', 'r = 0.5 Ω']], P1, '① 一节新电池',
-      'I = ' + F(i1, 2) + ' A，灯泡 ' + F(P1, 2) + ' W');
-    one(1160, [['新电池', 'E = 1.5 V', 'r = 0.5 Ω'], ['旧电池', 'E = 1.5 V', 'r = ' + F(rOld, 1) + ' Ω']], P2,
-      '② 再串一节旧电池', 'I = ' + F(i2, 2) + ' A，灯泡 ' + F(P2, 2) + ' W');
+    one(390, [['新电池', 'E = 1.5 V', 'r = 0.5 Ω']], P1, '① 一节新电池',
+      'I = ' + F(i1, 2) + ' A，灯泡 ' + F(P1, 2) + ' W', i1);
+    one(1170, [['新电池', 'E = 1.5 V', 'r = 0.5 Ω'], ['旧电池', 'E = 1.5 V', 'r = ' + F(rOld, 1) + ' Ω']], P2,
+      '② 再串一节旧电池', 'I = ' + F(i2, 2) + ' A，灯泡 ' + F(P2, 2) + ' W', i2);
 
     U.txt(ctx, 780, 250, 'E 相加：1.5 + 1.5 = 3.0 V', C.sub, 18, 400, 'center');
     U.arrow(ctx, 780, 276, 780, 306, C.dim, 2, 10);
     U.txt(ctx, 780, 352, P2 < P1 ? '亮度反而更低' : '亮度略高（内阻还小）', P2 < P1 ? C.gold : C.sub, 21, 700, 'center');
-    U.line(ctx, 780, 200, 780, 760, 'rgba(255,255,255,0.10)', 1, [6, 9]);
+    U.line(ctx, 780, 200, 780, 780, 'rgba(255,255,255,0.10)', 1, [6, 9]);
 
     panel({
       kicker: '读数',
@@ -613,7 +726,7 @@
     var maxW = 2.0 * 6, i, b;
     for (i = 0; i < 2; i++) {
       b = bats[i];
-      U.batteryV(ctx, b[2], 420, b[0], 'E = ' + F(b[1], 1) + ' V', null);
+      U.batteryPic(ctx, b[2], 420, b[0], 'E = ' + F(b[1], 1) + ' V');
       U.txt(ctx, b[2], 560, '每搬 1 C 做功 ' + F(b[1], 1) + ' J', C.sub, 16, 400, 'center');
       var bw = 130, bh = 380 * (b[1] * q) / maxW;
       ctx.save();
@@ -649,17 +762,20 @@
     var R = st.p, E = 6, r = 1.5, I = P.I(E, r, R), Uo = I * R, Ui = I * r;
     title(ctx, '沿电流走一圈：电势一路往下掉', '外电路降 IR，内电路降 Ir，两段加起来正好是 E');
 
-    var bx = 210, by = 560, top = 320, bot = 790, rx = 780;
-    U.poly(ctx, [[bx, by - 74], [bx, top], [rx, top]], C.wire, 3.6);
-    U.poly(ctx, [[bx, by + 70], [bx, bot], [rx, bot]], C.wire, 3.6);
-    U.poly(ctx, [[rx, top], [rx, by - 100]], C.wire, 3.6);
-    U.poly(ctx, [[rx, by + 100], [rx, bot]], C.wire, 3.6);
-    U.resistorV(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
-    U.batteryV(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    var bx = 210, by = 560, top = 320, bot = 800, rx = 760;
+    var bat = K.bat(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    var res = K.res(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
+    K.w(ctx, [bx, top], bat.t);
+    K.w(ctx, [bx, bot], bat.b);
+    K.w(ctx, [bx, top], [rx, top]);
+    K.w(ctx, [bx, bot], [rx, bot]);
+    K.w(ctx, [rx, top], res.t);
+    K.w(ctx, [rx, bot], res.b);
+
     if (st.anim) {
       var sp = Math.max(.25, Math.min(1.6, I / 2));
-      U.flow(ctx, [[bx, by - 74], [bx, top], [rx, top], [rx, by - 100]], st.phase * sp, C.gold, 64, 4.8);
-      U.flow(ctx, [[rx, by + 100], [rx, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [rx, top], res.t], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [[rx, bot], res.b, [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 64, 4.8);
     }
 
     var px0 = 980, px1 = 1520, base = 830, hi = 300;
@@ -668,10 +784,10 @@
     var yHi = hi, yMid = hi + (base - hi) * (Ui / E);
     U.txt(ctx, px0, 264, '沿电流方向的电势 φ', C.sub, 16, 600);
     U.line(ctx, xa - 10, base, xb + 10, base, 'rgba(255,255,255,0.22)', 2);
-    U.poly(ctx, [[xa, base], [x1, yHi], [x2, yHi]], C.gold, 4.5);
-    U.poly(ctx, [[x2, yHi], [x3, yMid]], C.gold, 4.5);
-    U.poly(ctx, [[x3, yMid], [x4, yMid]], C.metal, 4.5);
-    U.poly(ctx, [[x4, yMid], [x5, base]], C.pos, 4.5);
+    U.curve(ctx, [[xa, base], [x1, yHi], [x2, yHi]], C.gold, 4.5);
+    U.curve(ctx, [[x2, yHi], [x3, yMid]], C.gold, 4.5);
+    U.curve(ctx, [[x3, yMid], [x4, yMid]], C.metal, 4.5);
+    U.curve(ctx, [[x4, yMid], [x5, base]], C.pos, 4.5);
     U.txt(ctx, xa + 6, yHi - 68, '↑ 电源内部"举高"', C.goldL, 15, 600);
     U.txt(ctx, (x2 + x3) / 2, (yHi + yMid) / 2 - 22, 'U外 = IR = ' + F(Uo, 2) + ' V', C.white, 17, 600, 'center');
     U.txt(ctx, (x4 + x5) / 2 + 40, (yMid + base) / 2 + 6, 'U内 = Ir = ' + F(Ui, 2) + ' V', C.sub, 17, 600, 'center');
@@ -739,19 +855,25 @@
     var R = st.p, E = 6, r = 1.5, I = P.I(E, r, R), Uo = I * R, Ui = I * r;
     title(ctx, 'I = E /(R + r)：电流由"三件套"一起决定', '拖外电阻，看电流怎么跟着变 —— 分母里永远有 r');
 
-    var bx = 200, by = 540, top = 330, bot = 770, rx = 720;
-    U.poly(ctx, [[bx, by - 74], [bx, top], [rx, top]], C.wire, 3.6);
-    U.poly(ctx, [[bx, by + 70], [bx, bot], [rx, bot]], C.wire, 3.6);
-    U.poly(ctx, [[rx, top], [rx, by - 100]], C.wire, 3.6);
-    U.poly(ctx, [[rx, by + 100], [rx, bot]], C.wire, 3.6);
-    U.resistorV(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
-    U.batteryV(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
-    U.meterCircle(ctx, 460, top, 42, 'A', C.wire);
-    U.mono(ctx, 460, top + 66, F(I, 2) + ' A', C.goldL, 19, 700, 'center');
+    var bx = 200, by = 560, top = 330, bot = 790, rx = 740, mx = 480;
+    var bat = K.bat(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    var res = K.res(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
+    var amp = K.meterH(ctx, mx, top, 44, 'A', C.wire);
+
+    K.w(ctx, [bx, top], bat.t);
+    K.w(ctx, [bx, bot], bat.b);
+    K.w(ctx, [bx, top], amp.l);
+    K.w(ctx, amp.r, [rx, top]);
+    K.w(ctx, [rx, top], res.t);
+    K.w(ctx, [rx, bot], res.b);
+    K.w(ctx, [bx, bot], [rx, bot]);
+    U.mono(ctx, mx, top + 70, F(I, 2) + ' A', C.goldL, 19, 700, 'center');
+
     if (st.anim) {
       var sp = Math.max(.2, Math.min(1.6, I / 2.2));
-      U.flow(ctx, [[bx, by - 74], [bx, top], [rx, top], [rx, by - 100]], st.phase * sp, C.gold, 64, 4.8);
-      U.flow(ctx, [[rx, by + 100], [rx, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], amp.l], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [amp.r, [rx, top], res.t], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [res.b, [rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 64, 4.8);
     }
 
     var gx = 940, gy = 400, gw = 560, tot = R + r;
@@ -772,7 +894,7 @@
       rr = 0.12 + (Rmax - 0.12) * k / 90;
       pts.push([ax + aw * rr / Rmax, ay - (ah - 40) * P.I(E, r, rr) / Imax]);
     }
-    U.poly(ctx, pts, C.cyan, 3.2);
+    U.curve(ctx, pts, C.cyan, 3.2);
     var px = ax + aw * R / Rmax, py = ay - (ah - 40) * I / Imax;
     U.line(ctx, ax, py, px, py, 'rgba(255,255,255,0.22)', 1.2, [6, 6]);
     U.line(ctx, px, ay, px, py, 'rgba(255,255,255,0.22)', 1.2, [6, 6]);
@@ -798,23 +920,30 @@
     var R = st.p, E = 6, r = 1.5, I = P.I(E, r, R), Uo = I * R, Ui = I * r;
     title(ctx, 'U = E − Ir：负载变小，路端电压往下掉', '电压表量到的永远是路端电压 U，不是电动势 E');
 
-    var bx = 200, by = 560, top = 340, bot = 800, rx = 720;
-    U.poly(ctx, [[bx, by - 74], [bx, top], [rx, top]], C.wire, 3.6);
-    U.poly(ctx, [[bx, by + 70], [bx, bot], [rx, bot]], C.wire, 3.6);
-    U.poly(ctx, [[rx, top], [rx, by - 100]], C.wire, 3.6);
-    U.poly(ctx, [[rx, by + 100], [rx, bot]], C.wire, 3.6);
-    U.resistorV(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
-    U.batteryV(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    var bx = 200, by = 560, top = 340, bot = 800, rx = 700;
+    var bat = K.bat(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    var res = K.res(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
+
+    K.w(ctx, [bx, top], bat.t);
+    K.w(ctx, [bx, bot], bat.b);
+    K.w(ctx, [bx, top], [rx, top]);
+    K.w(ctx, [bx, bot], [rx, bot]);
+    K.w(ctx, [rx, top], res.t);
+    K.w(ctx, [rx, bot], res.b);
+
+    var vmx = rx + 250, vmy = (top + bot) / 2, vr = 44;
+    var vm = K.meterV(ctx, vmx, vmy, vr, 'V', C.gold);
+    K.w(ctx, [rx, top], [vmx, top]);
+    K.w(ctx, [vmx, top], vm.t);
+    K.w(ctx, [rx, bot], [vmx, bot]);
+    K.w(ctx, [vmx, bot], vm.b);
+    U.mono(ctx, vmx, vmy + vr + 34, F(Uo, 2) + ' V', C.goldL, 21, 700, 'center');
+
     if (st.anim) {
       var sp = Math.max(.2, Math.min(1.6, I / 2.2));
-      U.flow(ctx, [[bx, by - 74], [bx, top], [rx, top], [rx, by - 100]], st.phase * sp, C.gold, 64, 4.8);
-      U.flow(ctx, [[rx, by + 100], [rx, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [rx, top], res.t], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [res.b, [rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 64, 4.8);
     }
-
-    U.poly(ctx, [[rx + 120, top], [rx + 120, 450], [rx + 250, 450]], C.wire, 2.8);
-    U.poly(ctx, [[rx + 120, bot], [rx + 120, 690], [rx + 250, 690]], C.wire, 2.8);
-    U.meterCircle(ctx, rx + 236, 570, 42, 'V', C.gold);
-    U.mono(ctx, rx + 236, 646, F(Uo, 2) + ' V', C.goldL, 21, 700, 'center');
 
     var gx = 990, gy = 340, gw = 520;
     U.txt(ctx, gx, gy - 46, 'E = 6.00 V，被分成两段', C.sub, 17, 600);
@@ -836,7 +965,7 @@
       rr = 0.12 + (Rmax - 0.12) * k / 90;
       pts.push([ax + aw * rr / Rmax, ay - (ah - 34) * P.Uext(E, r, rr) / (E * 1.06)]);
     }
-    U.poly(ctx, pts, C.cyan, 3.2);
+    U.curve(ctx, pts, C.cyan, 3.2);
     var px = ax + aw * R / Rmax, py = ay - (ah - 34) * Uo / (E * 1.06);
     U.dot(ctx, px, py, 9, C.gold, 12);
     U.txt(ctx, ax + 16, ay - ah - 6, 'R 变大，U 回到 E', C.dim, 14, 400);
@@ -864,7 +993,7 @@
     U.grid(ctx, ax, ay, ax + aw, ay - ah + 20, 12, 7);
     function X(i) { return ax + aw * i / Imax; }
     function Y(u) { return ay - (ah - 40) * u / (E * 1.10); }
-    U.line(ctx, X(0), Y(E), X(Isc), Y(0), C.cyan, 3.6);
+    U.curve(ctx, [[X(0), Y(E)], [X(Isc), Y(0)]], C.cyan, 3.6);
     U.dot(ctx, X(0), Y(E), 9, C.gold, 12);
     U.txt(ctx, X(0) + 18, Y(E) - 6, 'E = ' + F(E, 1) + ' V（纵截距）', C.goldL, 19, 700);
     U.dot(ctx, X(Isc), Y(0), 9, C.pos, 12);
@@ -907,46 +1036,53 @@
     title(ctx, on ? '短路：外电阻为零，电流只剩 E/r' : '断路：没有电流，路端电压就是电动势',
       on ? '把外电阻拖到 0，看电流表冲到多少 —— 这就是"绝对不许短接"的原因' : '开关断开，外电路没有电流');
 
-    var bx = 200, by = 580, top = 350, bot = 810, rx = 700;
-    U.poly(ctx, [[bx, by - 74], [bx, top], [rx, top]], C.wire, 3.6);
-    U.poly(ctx, [[bx, by + 70], [bx, bot], [rx, bot]], C.wire, 3.6);
-    U.poly(ctx, [[rx, top], [rx, top + 70]], C.wire, 3.6);
-    U.dot(ctx, rx, top + 70, 7, C.wire, 0);
-    U.dot(ctx, rx, by - 100, 7, C.wire, 0);
-    if (on) U.line(ctx, rx, top + 70, rx, by - 100, C.wire, 3.6);
-    else U.line(ctx, rx, top + 70, rx + 96, top + 34, C.wire, 3.6);
-    U.txt(ctx, rx + 108, top + 40, 'K', C.sub, 19, 700);
-    U.poly(ctx, [[rx, by - 100], [rx, by + 100]], C.wire, 3.6);
-    if (on && !shorted) {
-      U.poly(ctx, [[rx, by - 100], [rx + 210, by - 100], [rx + 210, by + 100], [rx, by + 100]], C.wire, 3.6);
-      U.resistorV(ctx, rx + 210, by, 200, null, C.gold);
-      U.txt(ctx, rx + 210, by - 132, 'R = ' + F(R, 1) + ' Ω', C.sub, 15, 600, 'center');
+    var bx = 200, by = 590, top = 360, bot = 810, rx = 760, mx = 470, sx0 = 600, sx1 = 700;
+    var bat = K.bat(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    var amp = K.meterH(ctx, mx, top, 40, 'A', C.wire);
+    var sw = K.sw(ctx, sx0, sx1, top, on, 'K');
+
+    K.w(ctx, [bx, top], bat.t);
+    K.w(ctx, [bx, bot], bat.b);
+    K.w(ctx, [bx, top], amp.l);
+    K.w(ctx, amp.r, sw.l);
+    K.w(ctx, sw.r, [rx, top]);
+    K.w(ctx, [bx, bot], [rx, bot]);
+
+    if (shorted) {
+
+      K.w(ctx, [rx, top], [rx, bot]);
+      U.txt(ctx, rx + 34, (top + bot) / 2 - 30, '导线直接把电源两端连起来', C.red, 18, 700);
+      U.txt(ctx, rx + 34, (top + bot) / 2 + 2, '（外电阻 R = 0）', C.sub, 15, 400);
+    } else {
+      var res = K.res(ctx, rx, by, 200, null, on ? C.gold : C.metal);
+      K.w(ctx, [rx, top], res.t);
+      K.w(ctx, [rx, bot], res.b);
+      U.txt(ctx, rx + 34, by, on ? 'R = ' + F(R, 1) + ' Ω' : 'R = ∞（断路，不接负载）',
+        on ? C.sub : C.dim, 15, 600, 'left');
     }
-    if (shorted) U.txt(ctx, rx + 40, by, '导线直接连起来', C.red, 18, 700);
-    U.batteryV(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    U.mono(ctx, mx, top + 66, F(I, 3) + ' A', shorted ? C.red : C.goldL, 19, 700, 'center');
+
     if (st.anim && I > 0) {
       var sp = Math.max(.3, Math.min(2, I / 2.2));
-      U.flow(ctx, [[bx, by - 74], [bx, top], [rx, top]], st.phase * sp, C.gold, 60, 5);
-      U.flow(ctx, [[rx, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 60, 5);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], amp.l], st.phase * sp, C.gold, 60, 5);
+      U.flow(ctx, [amp.r, sw.l, sw.r, [rx, top]], st.phase * sp, C.gold, 60, 5);
+      U.flow(ctx, [[rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 60, 5);
     }
 
-    var mx = 1060;
-    U.meterCircle(ctx, mx, 420, 96, 'A', shorted ? C.red : C.wire);
-    U.mono(ctx, mx, 552, F(I, 3) + ' A', shorted ? C.red : C.goldL, 40, 700, 'center');
-    U.txt(ctx, mx, 600, '电流表读数', C.dim, 15, 400, 'center');
-
-    var ty = 690;
+    var tx = 1080;
     if (shorted) {
-      U.txt(ctx, mx, ty, '危险：R = 0 时 I = E/r', C.red, 21, 700, 'center');
-      U.txt(ctx, mx, ty + 40, '干电池 E=1.5 V、r≈0.5 Ω → 约 3 A', C.sub, 16, 400, 'center');
-      U.txt(ctx, mx, ty + 72, '铅蓄电池 r=0.005~0.1 Ω → 数百安', C.sub, 16, 400, 'center');
-      U.txt(ctx, mx, ty + 112, '绝对不允许把电源两极短接！', C.red, 18, 700, 'center');
+      U.txt(ctx, tx, 380, '危险：R = 0 时 I = E/r', C.red, 21, 700);
+      U.txt(ctx, tx, 424, '干电池 E=1.5 V、r≈0.5 Ω → 约 3 A', C.sub, 16, 400);
+      U.txt(ctx, tx, 456, '铅蓄电池 r=0.005~0.1 Ω → 数百安', C.sub, 16, 400);
+      U.txt(ctx, tx, 512, '绝对不允许把电源两极短接！', C.red, 18, 700);
     } else if (!on) {
-      U.txt(ctx, mx, ty, 'I = 0，Ir = 0，所以 U = E', C.negL, 21, 700, 'center');
-      U.txt(ctx, mx, ty + 42, '测电动势：不接负载，把表接在电源两端', C.sub, 16, 400, 'center');
+      U.txt(ctx, tx, 380, 'I = 0，Ir = 0，所以 U = E', C.negL, 21, 700);
+      U.txt(ctx, tx, 424, '测电动势：不接负载，把表接在电源两端', C.sub, 16, 400);
     } else {
-      U.txt(ctx, mx, ty, 'R 越小，I 越大，U 越小', C.sub, 18, 700, 'center');
+      U.txt(ctx, tx, 380, 'R 越小，I 越大，U 越小', C.sub, 19, 700);
     }
+    U.txt(ctx, tx, 620, '电流表串在干路上', C.dim, 15, 400);
+    U.txt(ctx, tx, 650, '开关串在干路上，断/合就是断路/通路', C.dim, 15, 400);
 
     panel({
       kicker: '读数',
@@ -976,7 +1112,7 @@
       rr = 0.02 + (Rmax - 0.02) * k / 120;
       pts.push([ax + aw * rr / Rmax, ay - (ah - 40) * P.Pout(E, r, rr) / (Pm * 1.18)]);
     }
-    U.poly(ctx, pts, C.cyan, 3.4);
+    U.curve(ctx, pts, C.cyan, 3.4);
     var xm = ax + aw * r / Rmax, ym = ay - (ah - 40) * Pm / (Pm * 1.18);
     U.line(ctx, xm, ay, xm, ym, 'rgba(255,255,255,0.22)', 1.4, [6, 6]);
     U.dot(ctx, xm, ym, 9, C.gold, 12);
@@ -1211,6 +1347,7 @@
   }
 
   function draw() {
+    R.geo.reset();
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = '#000000';
@@ -1324,6 +1461,68 @@
     if (!document.fullscreenElement && focus) setFocus(false);
   });
 
+  function wiringAudit() {
+    var g2 = R.geo.data(), TOL = 3;
+    var pts = [], wires = g2.wires;
+    function key(p) { return Math.round(p[0] / TOL) + ',' + Math.round(p[1] / TOL); }
+    function idx(p) {
+      var k = key(p);
+      if (!(k in pts)) pts[k] = pts.length;
+      return pts[k];
+    }
+
+    var n = 0, kk;
+    wires.forEach(function (wl) { wl.forEach(function (p) { idx(p); }); });
+    g2.terms.forEach(function (p) { idx(p); });
+    n = pts.length;
+    var parent = [];
+    for (var i = 0; i < n; i++) parent[i] = i;
+    function find(x) { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; }
+    function uni(x, y) { x = find(x); y = find(y); if (x !== y) parent[y] = x; }
+    var deg = new Array(n).fill(0);
+    wires.forEach(function (wl) {
+      for (var j = 1; j < wl.length; j++) { var A = idx(wl[j - 1]), B = idx(wl[j]); uni(A, B); deg[A]++; deg[B]++; }
+    });
+    var termSet = {};
+    g2.terms.forEach(function (p) { termSet[idx(p)] = true; });
+
+    var bad = [];
+
+    for (kk in pts) {
+      if (!(kk in pts)) continue;
+      var id = pts[kk];
+      if (!termSet[id] && deg[id] < 2) {
+        bad.push('悬空端点 (' + Math.round(parseFloat(kk.split(',')[0]) * TOL) + ',' + Math.round(parseFloat(kk.split(',')[1]) * TOL) + ')');
+      }
+    }
+
+    var wireEnds = [];
+    wires.forEach(function (wl) { wireEnds.push(wl[0], wl[wl.length - 1]); });
+    var idle = 0;
+    g2.terms.forEach(function (t) {
+      var hit = false;
+      for (var i = 0; i < wireEnds.length; i++) {
+        if (Math.abs(t[0] - wireEnds[i][0]) <= TOL && Math.abs(t[1] - wireEnds[i][1]) <= TOL) { hit = true; break; }
+      }
+      if (!hit) {
+
+        var mate = false;
+        g2.terms.forEach(function (u) {
+          if (u !== t && Math.abs(u[0] - t[0]) <= TOL && Math.abs(u[1] - t[1]) <= TOL) mate = true;
+        });
+        if (!mate) { idle++; bad.push('元件端子 (' + Math.round(t[0]) + ',' + Math.round(t[1]) + ') 没有任何导线接着'); }
+      }
+    });
+
+    var roots = {};
+    wires.forEach(function (wl) { roots[find(idx(wl[0]))] = true; });
+    var nRoots = Object.keys(roots).length;
+    if (wires.length && nRoots > 1) bad.push('导线分成 ' + nRoots + ' 段互不相连');
+
+    return { pass: bad.length === 0, wires: wires.length, terminals: g2.terms.length,
+             idleTerminals: idle, bodies: g2.bodies.length, components: nRoots, problems: bad.slice(0, 6) };
+  }
+
   g.__viz = {
     selfTest: function () {
       var r = g.PHY.runSelfTest();
@@ -1341,9 +1540,22 @@
         }
         if (!g.RENDER.scenes[s.scene]) bad.push(s.nav + ': 场景 ' + s.scene + ' 不存在');
       });
+
+      var wireBad = [];
+      var keep = cur;
+      S.forEach(function (s, i) {
+        cur = i;
+        if (P[i] == null && s.p) P[i] = s.p.val;
+        draw();
+        var w = wiringAudit();
+        if (!w.pass) wireBad.push({ step: s.nav, problems: w.problems.slice(0, 4) });
+      });
+      cur = keep; draw();
+
       r.interactionMismatch = bad;
+      r.wiring = { pass: wireBad.length === 0, bad: wireBad };
       r.steps = S.length;
-      r.pass = r.pass && bad.length === 0;
+      r.pass = r.pass && bad.length === 0 && wireBad.length === 0;
       return r;
     },
     go: go,
@@ -1361,7 +1573,8 @@
       for (var i = 0; i < d.length; i += 3) { h ^= d.charCodeAt(i); h = (h * 16777619) >>> 0; }
       return h.toString(16);
     },
-    box: function () { return { w: cw, h: chh, k: K }; }
+    box: function () { return { w: cw, h: chh, k: K }; },
+    wiringAudit: wiringAudit
   };
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
