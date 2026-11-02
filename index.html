@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12.2 闭合电路的欧姆定律 · 可交互课件</title>
+<style>
+  /* B 基调 · HE 视觉体系（风格与技术路线.md v4.0）：纯黑底 / 导线金属白 / 结论金 */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#000}
+  body{font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC","WenQuanYi Zen Hei",sans-serif;
+    color:#fff;-webkit-font-smoothing:antialiased}
+  #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+
+  /* 顶栏 */
+  header{position:absolute;left:0;top:0;width:1920px;height:54px;background:#0a0a0a;
+    border-bottom:1px solid #242424;display:flex;align-items:center;gap:12px;padding:0 18px}
+  header .no{font-size:13.5px;font-weight:800;color:#F0AC5F;letter-spacing:.5px;
+    border:1px solid #4a3a22;border-radius:4px;padding:2px 8px;background:#1a1408}
+  header h1{font-size:16px;font-weight:700;white-space:nowrap}
+  header .act{font-size:12px;color:#33C2DC;border:1px solid #1b4a52;border-radius:4px;
+    padding:2px 8px;white-space:nowrap;background:#0a1416}
+  header .sp{flex:1}
+  header .cnt{font-size:12.5px;color:#B0B0B0;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  /* 步骤导航 */
+  nav{position:absolute;left:0;top:55px;width:1920px;height:42px;background:#0a0a0a;
+    border-bottom:1px solid #1c1c1c;display:flex;align-items:center;gap:6px;padding:0 16px;overflow:hidden}
+  nav .sep{width:1px;height:18px;background:#2a2a2a;margin:0 5px;flex:0 0 auto}
+  nav button{font-family:inherit;font-size:12.5px;font-weight:600;color:#c8c8c8;background:#141414;
+    border:1px solid #242424;border-radius:4px;width:30px;height:24px;cursor:pointer;
+    font-variant-numeric:tabular-nums;flex:0 0 auto;transition:all .14s}
+  nav button:hover{background:#1e1e1e;border-color:#4a4a4a}
+  nav button.on{background:#3a2a12;border-color:#F0AC5F;color:#FFD08A;font-weight:800}
+
+  /* 主体：左画布 + 右栏 */
+  main{position:absolute;left:0;top:98px;width:1920px;height:912px;display:flex}
+  #view{position:relative;flex:1 1 auto;min-width:0;background:#000}
+  canvas{display:block}
+  aside{flex:0 0 400px;background:#0b0b0b;border-left:1px solid #242424;
+    padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+  aside .ttl{font-size:12px;font-weight:800;letter-spacing:1.6px;color:#6E6E6E}
+  aside .row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:9px 0;border-bottom:1px solid #1a1a1a}
+  aside .row span{font-size:14px;color:#9a9a9a}
+  aside .row b{font-family:"Courier New",monospace;font-size:19px;font-weight:700;color:#FFD08A;
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  aside .row b.warn{color:#FC6255}
+  aside .row b.gold{color:#F0AC5F}
+  aside .fml{margin-top:4px;font-family:"Courier New",monospace;font-size:17px;font-weight:700;
+    color:#F0AC5F;background:#141008;border:1px solid #3a2f18;border-radius:8px;
+    padding:12px 14px;line-height:1.5}
+  aside .nte{margin-top:2px;background:#0a1416;border:1px solid #16323a;border-radius:8px;padding:12px 14px}
+  aside .nte h4{font-size:13px;color:#33C2DC;font-weight:700;margin-bottom:6px}
+  aside .nte p{font-size:13.5px;color:#9a9a9a;line-height:1.65}
+
+  /* 底栏 */
+  footer{position:absolute;left:0;top:1008px;width:1920px;height:72px;background:#0a0a0a;
+    border-top:1px solid #242424;display:flex;align-items:center;gap:12px;padding:0 18px}
+  .hint{flex:1;min-width:0;font-size:15px;color:#c8c8c8;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis}
+  .hint b{color:#FFD08A;font-weight:700}
+  .ctl{display:flex;align-items:center;gap:10px;background:#111;border:1px solid #242424;
+    border-radius:8px;padding:7px 14px;flex:0 0 auto}
+  .ctl.off{opacity:.38}
+  .ctl label{font-size:13.5px;color:#9a9a9a;white-space:nowrap}
+  .ctl .v{font-family:"Courier New",monospace;font-size:19px;font-weight:700;color:#F0AC5F;
+    min-width:86px;text-align:right;font-variant-numeric:tabular-nums}
+  .ctl .v i{font-size:12px;color:#8a8a8a;font-style:normal;margin-left:2px}
+  input[type=range]{width:250px;height:6px;-webkit-appearance:none;appearance:none;
+    background:#2a2a2a;border-radius:3px;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;
+    border-radius:50%;background:#F0AC5F;border:3px solid #0a0a0a;box-shadow:0 0 0 1px #F0AC5F;cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#F0AC5F;
+    border:3px solid #0a0a0a;cursor:pointer}
+  input[type=range]:disabled{opacity:.3;cursor:default}
+  button{font-family:inherit;cursor:pointer}
+  button.mk{font-size:13.5px;color:#c8c8c8;background:#141414;border:1px solid #2c2c2c;
+    border-radius:8px;padding:9px 14px;white-space:nowrap}
+  button.mk:hover{background:#1e1e1e;border-color:#4a4a4a}
+  button.mk.on{color:#33C2DC;border-color:#0E8A96;background:#06181b}
+  button.pri{font-size:14px;font-weight:700;color:#0a0a0a;background:#F0AC5F;border:1px solid #F0AC5F;
+    border-radius:8px;padding:9px 18px;white-space:nowrap}
+  button.pri:hover{background:#FFD08A}
+  button.ghost{font-size:14px;color:#c8c8c8;background:#141414;border:1px solid #2c2c2c;
+    border-radius:8px;padding:9px 16px;white-space:nowrap}
+  button.ghost:hover{background:#1e1e1e;border-color:#4a4a4a}
+
+  /* 全屏（聚焦）：藏起顶栏/导航/右栏，主图铺满；点画面或 Esc 退出 */
+  #exitTip{display:none;position:absolute;right:14px;top:12px;z-index:8;font-size:13px;
+    color:#8a8a8a;background:rgba(10,10,10,.74);border:1px solid #2c2c2c;border-radius:7px;
+    padding:6px 12px;pointer-events:none}
+  body.fs header,body.fs nav,body.fs aside{display:none}
+  body.fs main{top:0;height:1008px}
+  body.fs footer{top:auto;bottom:16px;left:50%;transform:translateX(-50%);width:auto;
+    max-width:1780px;height:auto;background:rgba(10,10,10,.82);border:1px solid #2c2c2c;
+    border-radius:12px;padding:10px 16px;box-shadow:0 12px 34px rgba(0,0,0,.55)}
+  body.fs footer .hint{max-width:860px}
+  body.fs #exitTip{display:block}
+
+  #rotTip{display:none;position:fixed;left:50%;top:calc(50% + 26px);transform:translateX(-50%);
+    background:rgba(20,20,20,.92);color:#fff;font-size:14px;padding:8px 16px;border-radius:20px;
+    z-index:99;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage">
+  <header>
+    <span class="no">12.2</span>
+    <h1>闭合电路的欧姆定律</h1>
+    <span class="act" id="actName">第 1 幕</span>
+    <span class="sp"></span>
+    <span class="cnt" id="cnt">1 / 12</span>
+    <button class="ghost" id="btnFs" title="快捷键 F；Esc 或点画面退出" style="padding:6px 12px;font-size:13px">⛶ 全屏</button>
+  </header>
+  <nav id="toc"></nav>
+  <main>
+    <div id="view">
+      <canvas id="cv"></canvas>
+      <div id="exitTip">点画面任意处 / 按 Esc 退出全屏</div>
+    </div>
+    <aside>
+      <div class="ttl" id="railTitle">读数</div>
+      <div id="railbody"></div>
+    </aside>
+  </main>
+  <footer>
+    <div class="hint" id="hint">—</div>
+    <div class="ctl" id="ctl">
+      <label id="pLab">—</label>
+      <input type="range" id="pRange" min="0" max="1" step="0.1" value="0">
+      <div class="v" id="pVal">—</div>
+    </div>
+    <button class="mk" id="btnSw" style="display:none">开关 K：断开</button>
+    <button class="mk" id="btnPrev">◀ 上一步</button>
+    <button class="pri" id="btnNext">下一步 ▶</button>
+  </footer>
+</div>
+<div id="rotTip">屏幕太小：建议横屏，或改用电脑 / 投影观看</div>
+<script>
+(function (g) {
+  'use strict';
+
+  var LAMP_RL = 4.5;
+
+  function I_of(E, r, R) { return E / (R + r); }
+  function U_ext(E, r, R) { return I_of(E, r, R) * R; }
+  function U_int(E, r, R) { return I_of(E, r, R) * r; }
+  function P_out(E, r, R) { var i = I_of(E, r, R); return i * i * R; }
+  function P_all(E, r, R) { return E * I_of(E, r, R); }
+  function P_heat(E, r, R) { var i = I_of(E, r, R); return i * i * r; }
+  function eta(E, r, R) { return R / (R + r); }
+  function I_sc(E, r) { return E / r; }
+  function R_of_I(E, r, i) { return i <= 1e-9 ? Infinity : E / i - r; }
+  function P_max(E, r) { return E * E / (4 * r); }
+
+  function circuit(E, r, R) {
+    var i = I_of(E, r, R);
+    return {
+      I: i, U: i * R, Ui: i * r, E: E, r: r, R: R,
+      Pout: i * i * R, Pall: E * i, Pheat: i * i * r,
+      eta: R / (R + r), Isc: E / r, sum: i * R + i * r
+    };
+  }
+
+  function lamps(E, r, n, RL) {
+    RL = RL || LAMP_RL;
+    var Rext = RL / n;
+    var It = E / (Rext + r);
+    var IL = It / n;
+    return {
+      n: n, RL: RL, Rext: Rext, It: It, IL: IL, U: It * Rext,
+      PL: IL * IL * RL, P1: (function () { var i1 = E / (RL + r); return i1 * i1 * RL; })()
+    };
+  }
+
+  function energy(E, r, R, t) {
+    var i = I_of(E, r, R);
+    return { I: i, W: E * i * t, Qo: i * i * R * t, Qi: i * i * r * t, t: t };
+  }
+
+  function emfWork(E, q) { return E * q; }
+
+  function runSelfTest() {
+    var cases = [], fail = 0;
+    function ck(name, got, want, tol) {
+      tol = tol == null ? 1e-9 : tol;
+      var ok = Math.abs(got - want) <= tol * Math.max(1, Math.abs(want));
+      if (!ok) fail++;
+      cases.push({ name: name, got: got, want: want, ok: ok });
+    }
+    var c = circuit(6, 1.5, 4.5);
+    ck('I = E/(R+r)', c.I, 1);
+    ck('U外 = IR', c.U, 4.5);
+    ck('U内 = Ir', c.Ui, 1.5);
+    ck('U外+U内 = E', c.sum, 6);
+    ck('P出 = I²R', c.Pout, 4.5);
+    ck('P总 = EI', c.Pall, 6);
+    ck('P内 = I²r', c.Pheat, 1.5);
+    ck('效率 η = R/(R+r)', c.eta, 0.75);
+    ck('短路电流 Isc = E/r', c.Isc, 4);
+    ck('短路 R=0 → I = Isc', I_of(6, 1.5, 0), 4);
+    ck('短路 R=0 → U = 0', U_ext(6, 1.5, 0), 0);
+    ck('断路 R=1e9 → U = E', U_ext(6, 1.5, 1e9), 6, 1e-6);
+    ck('断路 R=1e9 → I = 0', I_of(6, 1.5, 1e9), 0, 1e-6);
+    ck('P出最大 = E²/4r', P_max(6, 1.5), 6);
+    ck('R = r 时 P出 = Pmax', P_out(6, 1.5, 1.5), 6);
+    ck('R = r 时 η = 0.5', eta(6, 1.5, 1.5), 0.5);
+    ck('R=2r 时 P出小于最大', P_out(6, 1.5, 3) < P_max(6, 1.5) ? 1 : 0, 1);
+    ck('R=0.5r 时 P出小于最大', P_out(6, 1.5, 0.75) < P_max(6, 1.5) ? 1 : 0, 1);
+    ck('反算 R = E/I − r', R_of_I(6, 1.5, 1), 4.5);
+    ck('电动势做功 W = Eq', emfWork(6, 3), 18);
+    ck('W/q 与 q 无关', emfWork(6, 3) / 3, emfWork(6, 5) / 5);
+
+    var l1 = lamps(6, 1.5, 1), l3 = lamps(6, 1.5, 3);
+    ck('1 盏：干路 I', l1.It, 1);
+    ck('1 盏：每盏 P', l1.PL, 4.5);
+    ck('3 盏：外阻 R/3', l3.Rext, 1.5);
+    ck('3 盏：干路 I', l3.It, 2);
+    ck('3 盏：每盏 I', l3.IL, 2 / 3);
+    ck('3 盏：每盏 P', l3.PL, 2);
+    ck('并联越多每盏越暗', l3.PL < l1.PL ? 1 : 0, 1);
+
+    var e = energy(6, 1.5, 4.5, 10);
+    ck('三笔账 W = EIt', e.W, 60);
+    ck('三笔账 Q外 = I²Rt', e.Qo, 45);
+    ck('三笔账 Q内 = I²rt', e.Qi, 15);
+    ck('三笔账 W = Q外 + Q内', e.W - e.Qo - e.Qi, 0);
+    ck('t = 0 时三者全为 0', energy(6, 1.5, 4.5, 0).W, 0);
+
+    return { pass: fail === 0, failed: fail, total: cases.length, cases: cases };
+  }
+
+  g.PHY = {
+    LAMP_RL: LAMP_RL,
+    I: I_of, Uext: U_ext, Uint: U_int, Pout: P_out, Pall: P_all, Pheat: P_heat,
+    eta: eta, Isc: I_sc, RofI: R_of_I, Pmax: P_max,
+    circuit: circuit, lamps: lamps, energy: energy, emfWork: emfWork,
+    runSelfTest: runSelfTest
+  };
+})(window);
+</script>
+<script>
+
+(function (g) {
+  'use strict';
+
+  var W = 1600, H = 1000;
+  var C = {
+    bg: '#000000', wire: '#E6E6E6', metal: '#9C9C9C', dim: '#6E6E6E', deep: '#3E3E3E',
+    pos: '#E06A96', posL: '#F4A8C6', neg: '#0E8A96', negL: '#33C2DC',
+    gold: '#F0AC5F', goldL: '#FFD08A', cyan: '#05E8FD', red: '#FC6255',
+    white: '#FFFFFF', sub: '#B0B0B0'
+  };
+
+  function rrect(ctx, x, y, w, h, r) {
+    r = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function line(ctx, x1, y1, x2, y2, color, w, dash) {
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = w || 2; ctx.lineCap = 'round';
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.restore();
+  }
+  function poly(ctx, pts, color, w, dash) {
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = w || 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath();
+    for (var i = 0; i < pts.length; i++) { if (i) ctx.lineTo(pts[i][0], pts[i][1]); else ctx.moveTo(pts[i][0], pts[i][1]); }
+    ctx.stroke();
+    ctx.restore();
+  }
+  function txt(ctx, x, y, s, color, size, weight, align) {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = (weight || 400) + ' ' + (size || 18) + 'px "Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif';
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(s, x, y);
+    ctx.restore();
+  }
+  function mono(ctx, x, y, s, color, size, weight, align) {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = (weight || 700) + ' ' + (size || 22) + 'px "Courier New",monospace';
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(s, x, y);
+    ctx.restore();
+  }
+  function dot(ctx, x, y, r, color, blur) {
+    ctx.save();
+    if (blur) { ctx.shadowColor = color; ctx.shadowBlur = blur; }
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function arrow(ctx, x1, y1, x2, y2, color, w, head) {
+    head = head || 14;
+    var a = Math.atan2(y2 - y1, x2 - x1);
+    ctx.save();
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = w || 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - Math.cos(a) * head * 0.8, y2 - Math.sin(a) * head * 0.8); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - head * Math.cos(a - 0.4), y2 - head * Math.sin(a - 0.4));
+    ctx.lineTo(x2 - head * Math.cos(a + 0.4), y2 - head * Math.sin(a + 0.4));
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  function segs(pts) {
+    var out = [], L = 0;
+    for (var i = 1; i < pts.length; i++) {
+      var dx = pts[i][0] - pts[i - 1][0], dy = pts[i][1] - pts[i - 1][1];
+      var d = Math.sqrt(dx * dx + dy * dy);
+      out.push({ x0: pts[i - 1][0], y0: pts[i - 1][1], dx: dx, dy: dy, d: d, s: L });
+      L += d;
+    }
+    return { seg: out, len: L };
+  }
+  function at(pts, d) {
+    var s = segs(pts), i, q;
+    for (i = 0; i < s.seg.length; i++) {
+      q = s.seg[i];
+      if (d <= q.s + q.d) { var k = (d - q.s) / (q.d || 1); return [q.x0 + q.dx * k, q.y0 + q.dy * k]; }
+    }
+    q = s.seg[s.seg.length - 1];
+    return [q.x0 + q.dx, q.y0 + q.dy];
+  }
+  function flow(ctx, pts, phase, color, gap, r) {
+    var s = segs(pts), L = s.len;
+    var off = ((phase * 60) % gap + gap) % gap;
+    for (var d = off; d < L - 10; d += gap) {
+      var p = at(pts, d);
+      dot(ctx, p[0], p[1], r || 4.6, color, 9);
+    }
+  }
+
+  function batteryV(ctx, x, y, label, emf, sub) {
+    line(ctx, x, y - 74, x, y - 26, C.wire, 3.2);
+    line(ctx, x, y + 22, x, y + 70, C.wire, 3.2);
+    line(ctx, x - 34, y - 26, x + 34, y - 26, C.pos, 6);
+    line(ctx, x - 19, y + 22, x + 19, y + 22, C.neg, 6);
+    txt(ctx, x + 46, y - 28, '+', C.pos, 20, 700);
+    txt(ctx, x + 46, y + 24, '−', C.neg, 20, 700);
+    if (label) txt(ctx, x - 50, y - 4, label, C.sub, 16, 600, 'right');
+    if (emf != null) txt(ctx, x + 48, y - 4, emf, C.white, 16, 700, 'left');
+    if (sub) txt(ctx, x - 50, y + 30, sub, C.dim, 14, 400, 'right');
+  }
+  function resistorV(ctx, x, y, h, label, color) {
+    var w = 46;
+    ctx.save();
+    ctx.fillStyle = '#0a0a0a'; ctx.strokeStyle = color || C.wire; ctx.lineWidth = 2.8;
+    rrect(ctx, x - w / 2, y - h / 2, w, h, 6); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    if (label) txt(ctx, x + 34, y, label, C.sub, 16, 600, 'left');
+  }
+  function resistorH(ctx, x, y, w, label, color) {
+    var h = 44;
+    ctx.save();
+    ctx.fillStyle = '#0a0a0a'; ctx.strokeStyle = color || C.wire; ctx.lineWidth = 2.8;
+    rrect(ctx, x - w / 2, y - h / 2, w, h, 6); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    if (label) txt(ctx, x, y - h / 2 - 20, label, C.sub, 16, 600, 'center');
+  }
+
+  function lamp(ctx, x, y, r, P, P0, name) {
+    var k = Math.max(0, Math.min(1.25, P / (P0 || 4.5)));
+    var a = Math.min(0.92, 0.05 + 0.9 * k);
+    ctx.save();
+    var RR = r * (2.4 + 1.9 * k);
+    var gd = ctx.createRadialGradient(x, y, r * 0.15, x, y, RR);
+    gd.addColorStop(0, 'rgba(240,172,95,' + (0.6 * a).toFixed(3) + ')');
+    gd.addColorStop(1, 'rgba(240,172,95,0)');
+    ctx.fillStyle = gd;
+    ctx.beginPath(); ctx.arc(x, y, RR, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = k > 0.3 ? C.gold : C.metal;
+    ctx.lineWidth = 3.4;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+    var q = r * 0.7;
+    ctx.beginPath();
+    ctx.moveTo(x - q, y - q); ctx.lineTo(x + q, y + q);
+    ctx.moveTo(x + q, y - q); ctx.lineTo(x - q, y + q);
+    ctx.strokeStyle = k > 0.3 ? C.goldL : C.dim;
+    ctx.lineWidth = 2.4;
+    ctx.stroke();
+    ctx.restore();
+    if (name) txt(ctx, x, y + r + 30, name, C.sub, 15, 600, 'center');
+  }
+  function meterCircle(ctx, x, y, r, letter, color) {
+    ctx.save();
+    ctx.fillStyle = '#0A0A0A'; ctx.strokeStyle = color || C.wire; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    txt(ctx, x, y + 1, letter, color || C.white, r * 0.95, 700, 'center');
+  }
+  function axis(ctx, x0, y0, x1, y1, xlab, ylab) {
+    arrow(ctx, x0, y0, x1, y0, C.metal, 2, 12);
+    arrow(ctx, x0, y0, x0, y1, C.metal, 2, 12);
+    if (xlab) txt(ctx, x1 - 4, y0 + 30, xlab, C.sub, 16, 600, 'right');
+    if (ylab) txt(ctx, x0 - 16, y1 + 8, ylab, C.sub, 16, 600, 'left');
+  }
+  function grid(ctx, x0, y0, x1, y1, nx, ny) {
+    ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.075)'; ctx.lineWidth = 1;
+    var i, x, y;
+    for (i = 1; i < nx; i++) { x = x0 + (x1 - x0) * i / nx; ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1); ctx.stroke(); }
+    for (i = 1; i < ny; i++) { y = y0 + (y1 - y0) * i / ny; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+    ctx.restore();
+  }
+  function cap(ctx, x, y, s, color, size, align, weight) {
+    txt(ctx, x, y, s, color || C.sub, size || 16, weight || 400, align);
+  }
+  function fmt(v, n) {
+    if (!isFinite(v)) return '∞';
+    if (Math.abs(v) >= 10000) return (v / 1000).toFixed(0) + 'k';
+    if (Math.abs(v) >= 1000) return (v / 1000).toFixed(1) + 'k';
+    return v.toFixed(n == null ? 2 : n);
+  }
+
+  g.RENDER = { W: W, H: H, C: C, fmt: fmt, panel: null, scenes: {} };
+  g.RENDER.U = {
+    rrect: rrect, line: line, poly: poly, txt: txt, mono: mono, dot: dot, arrow: arrow,
+    flow: flow, batteryV: batteryV, resistorV: resistorV, resistorH: resistorH, lamp: lamp,
+    meterCircle: meterCircle, axis: axis, grid: grid, cap: cap
+  };
+})(window);
+</script>
+<script>
+
+(function (g) {
+  'use strict';
+  var U = g.RENDER.U, C = g.RENDER.C, P = g.PHY, F = g.RENDER.fmt;
+
+  function title(ctx, t, sub) {
+    U.txt(ctx, 60, 56, t, C.white, 27, 700);
+    if (sub) U.txt(ctx, 60, 100, sub, C.sub, 17, 400);
+  }
+  function panel(o) { g.RENDER.panel = o; }
+  function tag(ctx, x, y, s, color) {
+    U.txt(ctx, x, y, s, color || C.dim, 15, 600);
+  }
+
+  function s1(ctx, st) {
+    var n = st.n, L = P.lamps(6, 1.5, n, 4.5);
+    title(ctx, '多接一盏灯，为什么每盏都变暗？', '规格相同的灯并联在同一个电池上 —— 只是灯多了几盏');
+
+    var bx = 210, by = 560, top = 300, bot = 800, x0 = 430, x1 = 1180;
+    var gap = (x1 - x0) / n;
+
+    U.poly(ctx, [[bx, by - 74], [bx, top], [x1, top]], C.wire, 3.6);
+    U.poly(ctx, [[bx, by + 70], [bx, bot], [x1, bot]], C.wire, 3.6);
+    U.batteryV(ctx, bx, by, '电池', 'E = 6 V', 'r = 1.5 Ω');
+
+    var i, lx;
+    for (i = 0; i < n; i++) {
+      lx = x0 + gap * (i + 0.5);
+      U.poly(ctx, [[lx, top], [lx, by - 52]], C.wire, 3.6);
+      U.poly(ctx, [[lx, by + 52], [lx, bot]], C.wire, 3.6);
+      U.lamp(ctx, lx, by, 50, L.PL, L.P1, 'L' + (i + 1));
+      U.mono(ctx, lx, by + 116, F(L.IL, 2) + ' A', C.sub, 18, 700, 'center');
+    }
+    if (st.anim) {
+      var sp = Math.max(.3, Math.min(1.6, L.It / 2.2));
+      U.flow(ctx, [[bx, by - 74], [bx, top], [x1, top]], st.phase * sp, C.gold, 72, 5);
+      U.flow(ctx, [[x1, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 72, 5);
+    }
+
+    var cx = 1300, cy = 700, barMax = 300, mx = Math.max(L.P1, L.PL) * 1.3;
+    tag(ctx, cx - 40, cy - 340, '每盏的功率');
+    var bars = [[L.P1, '只有一盏', C.metal, .40], [L.PL, '现在每盏', C.gold, .95]];
+    for (i = 0; i < 2; i++) {
+      var hh = barMax * bars[i][0] / mx;
+      ctx.save();
+      ctx.fillStyle = bars[i][2]; ctx.globalAlpha = bars[i][3];
+      U.rrect(ctx, cx + i * 130, cy - hh, 90, hh, 6); ctx.fill();
+      ctx.restore();
+      U.mono(ctx, cx + i * 130 + 45, cy - hh - 26, F(bars[i][0], 2) + ' W', C.white, 18, 700, 'center');
+      tag(ctx, cx + i * 130 + 45, cy + 30, bars[i][1], C.sub, 15, 400, 'center');
+    }
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['并联的灯数 n', n + ' 盏'],
+        ['干路电流 I', F(L.It, 2) + ' A'],
+        ['每盏分到的电流', F(L.IL, 2) + ' A'],
+        ['每盏的实际功率', F(L.PL, 2) + ' W', L.PL < L.P1 - 0.02 ? 'warn' : 'gold']
+      ],
+      formula: '并联越多 → R外 越小 → I 越大 → Ir 越大 → 每盏越暗',
+      note: ['想一想', '灯是并联的，"互不影响"是初中的说法。', '可是每盏都暗了 —— 电池两端变"软"了。']
+    });
+  }
+
+  function s2(ctx, st) {
+    var rOld = st.p;
+    var i1 = 1.5 / (4.5 + 0.5), P1 = i1 * i1 * 4.5;
+    var r2 = 0.5 + rOld, i2 = 3.0 / (4.5 + r2), P2 = i2 * i2 * 4.5;
+    title(ctx, '串一节旧电池：电动势翻倍，灯反而更暗', '旧电池的电动势一样是 1.5 V，只是内阻大得多');
+
+    function one(cx, sources, Pl, name, itxt) {
+      var top = 330, bot = 720, cy = 525;
+      U.poly(ctx, [[cx - 200, top], [cx + 200, top]], C.wire, 3.6);
+      U.poly(ctx, [[cx - 200, bot], [cx + 200, bot]], C.wire, 3.6);
+      U.poly(ctx, [[cx + 200, top], [cx + 200, cy - 52]], C.wire, 3.6);
+      U.poly(ctx, [[cx + 200, cy + 52], [cx + 200, bot]], C.wire, 3.6);
+      for (var k = 0; k < sources.length; k++) {
+        var y = cy - (sources.length - 1) * 82 + k * 164;
+        U.batteryV(ctx, cx - 200, y, sources[k][0], sources[k][1], sources[k][2]);
+      }
+      U.lamp(ctx, cx + 200, cy, 50, Pl, 4.5, null);
+      U.txt(ctx, cx, 800, name, C.white, 20, 700, 'center');
+      U.txt(ctx, cx, 838, itxt, C.sub, 16, 400, 'center');
+      if (st.anim) {
+        var sp = Math.max(.25, Math.min(1.3, i1 / 1.2));
+        U.flow(ctx, [[cx - 200, top], [cx + 200, top]], st.phase * sp, C.gold, 66, 4.6);
+        U.flow(ctx, [[cx + 200, bot], [cx - 200, bot]], st.phase * sp, C.gold, 66, 4.6);
+      }
+    }
+    one(400, [['新电池', 'E = 1.5 V', 'r = 0.5 Ω']], P1, '① 一节新电池',
+      'I = ' + F(i1, 2) + ' A，灯泡 ' + F(P1, 2) + ' W');
+    one(1160, [['新电池', 'E = 1.5 V', 'r = 0.5 Ω'], ['旧电池', 'E = 1.5 V', 'r = ' + F(rOld, 1) + ' Ω']], P2,
+      '② 再串一节旧电池', 'I = ' + F(i2, 2) + ' A，灯泡 ' + F(P2, 2) + ' W');
+
+    U.txt(ctx, 780, 250, 'E 相加：1.5 + 1.5 = 3.0 V', C.sub, 18, 400, 'center');
+    U.arrow(ctx, 780, 276, 780, 306, C.dim, 2, 10);
+    U.txt(ctx, 780, 352, P2 < P1 ? '亮度反而更低' : '亮度略高（内阻还小）', P2 < P1 ? C.gold : C.sub, 21, 700, 'center');
+    U.line(ctx, 780, 200, 780, 760, 'rgba(255,255,255,0.10)', 1, [6, 9]);
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['旧电池内阻 r旧', F(rOld, 1) + ' Ω'],
+        ['电池组电动势 E', '3.00 V'],
+        ['电池组内阻 r', F(r2, 2) + ' Ω'],
+        ['灯泡实际功率', F(P2, 2) + ' W', P2 < P1 ? 'warn' : 'gold']
+      ],
+      formula: 'I = E /(R + r) —— 内阻变大，电流变小',
+      note: ['关键', '旧电池的电动势几乎没变，变的是内阻。', '所以电压表量不出电动势。']
+    });
+  }
+
+  function s3(ctx, st) {
+    var s = st.p, E = 1.5, q = 3;
+    title(ctx, '电源内部：静电力拦路，非静电力搬人', '把正电荷从负极搬到正极，靠的是非静电力做的功');
+
+    var x0 = 300, x1 = 1120, yTop = 300, yBot = 810, ym = 560;
+    ctx.save();
+    ctx.strokeStyle = C.metal; ctx.lineWidth = 3;
+    U.rrect(ctx, x0, yTop, x1 - x0, yBot - yTop, 16); ctx.stroke();
+    ctx.restore();
+    U.line(ctx, x0 + 44, yTop + 70, x0 + 44, yBot - 70, C.neg, 9);
+    U.line(ctx, x1 - 44, yTop + 70, x1 - 44, yBot - 70, C.pos, 9);
+    U.txt(ctx, x0 + 44, yBot - 34, '负极', C.negL, 18, 700, 'center');
+    U.txt(ctx, x1 - 44, yBot - 34, '正极', C.posL, 18, 700, 'center');
+
+    var i, yy;
+    for (i = 0; i < 4; i++) {
+      yy = yTop + 110 + i * 96;
+      U.arrow(ctx, x1 - 130, yy, x0 + 170, yy, 'rgba(252,98,85,0.70)', 2.4, 13);
+    }
+    U.txt(ctx, (x0 + x1) / 2, yTop + 46, '内部静电场 E′（正极 → 负极）：它把正电荷往回推', C.red, 17, 600, 'center');
+
+    var cx = x0 + 100 + (x1 - x0 - 200) * s;
+    U.dot(ctx, cx, ym, 24, C.pos, 20);
+    U.txt(ctx, cx, ym, '+', C.white, 24, 700, 'center');
+    U.arrow(ctx, cx + 34, ym - 62, cx + 148, ym - 62, C.cyan, 4.5, 17);
+    U.txt(ctx, cx + 92, ym - 96, 'F非', C.cyan, 17, 700, 'center');
+
+    U.line(ctx, x0 + 100, ym + 100, x1 - 100, ym + 100, 'rgba(255,255,255,0.16)', 2);
+    U.line(ctx, x0 + 100, ym + 100, cx, ym + 100, C.gold, 6);
+    U.txt(ctx, (x0 + x1) / 2, ym + 136, '搬运进度 ' + Math.round(s * 100) + '%', C.sub, 16, 400, 'center');
+
+    var ex = 1290, eBase = 800, eH = 400, frac = Math.max(0.02, s);
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.10)';
+    U.rrect(ctx, ex, eBase - eH, 100, eH, 8); ctx.fill();
+    ctx.fillStyle = C.gold; ctx.globalAlpha = .92;
+    U.rrect(ctx, ex, eBase - eH * frac, 100, eH * frac, 8); ctx.fill();
+    ctx.restore();
+    U.txt(ctx, ex + 50, eBase + 30, '电势能 Ep', C.sub, 16, 400, 'center');
+    U.mono(ctx, ex + 50, eBase - eH * frac - 26, F(E * q * frac, 1) + ' J', C.goldL, 19, 700, 'center');
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['电动势 E', '1.50 V'],
+        ['搬运的电荷 q', q + ' C'],
+        ['非静电力做功 W', F(E * q * s, 1) + ' J'],
+        ['电势能增加 ΔEp', F(E * q * s, 1) + ' J'],
+        ['W ÷ q', F(E * s, 2) + ' V']
+      ],
+      formula: 'W = Eq —— 搬得越多，电势能越高',
+      note: ['两个力', '静电力：正极 → 负极，把电荷往回推。', '非静电力：负极 → 正极，把电荷搬过去。']
+    });
+  }
+
+  function s4(ctx, st) {
+    var q = st.p;
+    title(ctx, 'E = W / q：每搬 1 C 电荷能做多少功', '搬的电荷越多，做的功越多 —— 但 W/q 一直是同一个数');
+
+    var bats = [['干电池', 1.5, 420, C.neg], ['铅蓄电池', 2.0, 980, C.pos]];
+    var maxW = 2.0 * 6, i, b;
+    for (i = 0; i < 2; i++) {
+      b = bats[i];
+      U.batteryV(ctx, b[2], 420, b[0], 'E = ' + F(b[1], 1) + ' V', null);
+      U.txt(ctx, b[2], 560, '每搬 1 C 做功 ' + F(b[1], 1) + ' J', C.sub, 16, 400, 'center');
+      var bw = 130, bh = 380 * (b[1] * q) / maxW;
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,0.09)';
+      U.rrect(ctx, b[2] - bw / 2, 860 - 380, bw, 380, 6); ctx.fill();
+      ctx.fillStyle = b[3]; ctx.globalAlpha = .92;
+      U.rrect(ctx, b[2] - bw / 2, 860 - bh, bw, bh, 6); ctx.fill();
+      ctx.restore();
+      U.mono(ctx, b[2], 860 - bh - 30, 'W = ' + F(b[1] * q, 1) + ' J', C.white, 20, 700, 'center');
+      U.mono(ctx, b[2] + 110, 640, 'W/q = ' + F(b[1], 2) + ' V', i === 0 ? C.negL : C.posL, 21, 700, 'left');
+    }
+    U.txt(ctx, 700, 700, 'q', C.gold, 22, 700, 'center');
+    U.txt(ctx, 700, 736, '变', C.dim, 15, 400, 'center');
+    U.txt(ctx, 700, 806, 'W', C.white, 22, 700, 'center');
+    U.txt(ctx, 700, 842, '变', C.dim, 15, 400, 'center');
+    U.txt(ctx, 700, 906, 'W/q 不变', C.goldL, 18, 700, 'center');
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['搬运电荷 q', F(q, 1) + ' C'],
+        ['干电池做功 W', F(1.5 * q, 1) + ' J'],
+        ['干电池 W/q', '1.50 V'],
+        ['蓄电池做功 W', F(2.0 * q, 1) + ' J'],
+        ['蓄电池 W/q', '2.00 V']
+      ],
+      formula: 'E = W / q（单位 V）',
+      note: ['三句话', '① E 由电源本身决定，与外电路无关；', '② 干电池的 E 与体积无关；', '③ E 不是电压，只是单位相同。']
+    });
+  }
+
+  function s5(ctx, st) {
+    var R = st.p, E = 6, r = 1.5, I = P.I(E, r, R), Uo = I * R, Ui = I * r;
+    title(ctx, '沿电流走一圈：电势一路往下掉', '外电路降 IR，内电路降 Ir，两段加起来正好是 E');
+
+    var bx = 210, by = 560, top = 320, bot = 790, rx = 780;
+    U.poly(ctx, [[bx, by - 74], [bx, top], [rx, top]], C.wire, 3.6);
+    U.poly(ctx, [[bx, by + 70], [bx, bot], [rx, bot]], C.wire, 3.6);
+    U.poly(ctx, [[rx, top], [rx, by - 100]], C.wire, 3.6);
+    U.poly(ctx, [[rx, by + 100], [rx, bot]], C.wire, 3.6);
+    U.resistorV(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
+    U.batteryV(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    if (st.anim) {
+      var sp = Math.max(.25, Math.min(1.6, I / 2));
+      U.flow(ctx, [[bx, by - 74], [bx, top], [rx, top], [rx, by - 100]], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [[rx, by + 100], [rx, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 64, 4.8);
+    }
+
+    var px0 = 980, px1 = 1520, base = 830, hi = 300;
+    var xa = px0 + 30, xb = px1 - 10, tot = xb - xa;
+    var x1 = xa + tot * 0.10, x2 = x1 + tot * 0.34, x3 = x2 + tot * 0.26, x4 = x3 + tot * 0.16, x5 = xb;
+    var yHi = hi, yMid = hi + (base - hi) * (Ui / E);
+    U.txt(ctx, px0, 264, '沿电流方向的电势 φ', C.sub, 16, 600);
+    U.line(ctx, xa - 10, base, xb + 10, base, 'rgba(255,255,255,0.22)', 2);
+    U.poly(ctx, [[xa, base], [x1, yHi], [x2, yHi]], C.gold, 4.5);
+    U.poly(ctx, [[x2, yHi], [x3, yMid]], C.gold, 4.5);
+    U.poly(ctx, [[x3, yMid], [x4, yMid]], C.metal, 4.5);
+    U.poly(ctx, [[x4, yMid], [x5, base]], C.pos, 4.5);
+    U.txt(ctx, xa + 6, yHi - 68, '↑ 电源内部"举高"', C.goldL, 15, 600);
+    U.txt(ctx, (x2 + x3) / 2, (yHi + yMid) / 2 - 22, 'U外 = IR = ' + F(Uo, 2) + ' V', C.white, 17, 600, 'center');
+    U.txt(ctx, (x4 + x5) / 2 + 40, (yMid + base) / 2 + 6, 'U内 = Ir = ' + F(Ui, 2) + ' V', C.sub, 17, 600, 'center');
+    U.line(ctx, xa - 10, yMid, x3, yMid, 'rgba(255,255,255,0.12)', 1, [6, 6]);
+    U.txt(ctx, xa - 18, base, '0', C.dim, 15, 400, 'right');
+    U.txt(ctx, xa - 18, yHi, 'E', C.dim, 15, 400, 'right');
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['外电阻 R', F(R, 1) + ' Ω'],
+        ['电流 I = E/(R+r)', F(I, 2) + ' A'],
+        ['外电路压降 IR', F(Uo, 2) + ' V'],
+        ['内电路压降 Ir', F(Ui, 2) + ' V'],
+        ['两段之和', F(Uo + Ui, 2) + ' V']
+      ],
+      formula: 'E = U外 + U内',
+      note: ['一句话', '电动势是"总降落"：外电路分掉 U外，内阻分掉 U内。', 'R 越小，内阻分得越多。']
+    });
+  }
+
+  function s6(ctx, st) {
+    var t = st.p, E = 6, r = 1.5, R = 4.5;
+    var I = P.I(E, r, R), W = E * I * t, Qo = I * I * R * t, Qi = I * I * r * t;
+    title(ctx, '三笔账：电源给出去的，正好等于两边烧掉的', '取一段时间 t，把能量一笔一笔算清楚');
+
+    var x0 = 120, bw = 700, mx = Math.max(W, Qo, Qi) || 1, i, y;
+    var rows = [
+      ['电源输出电能 W = EIt', W, C.gold, '非静电力做的功'],
+      ['外电路发热 Q外 = I²Rt', Qo, C.neg, 'R 上变成内能'],
+      ['内电路发热 Q内 = I²rt', Qi, C.pos, 'r 上变成内能']
+    ];
+    for (i = 0; i < 3; i++) {
+      y = 300 + i * 170;
+      U.txt(ctx, x0, y - 44, rows[i][0], C.white, 21, 700);
+      U.txt(ctx, x0 + bw + 30, y - 44, rows[i][3], C.dim, 15, 400);
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,0.07)';
+      U.rrect(ctx, x0, y, bw, 58, 6); ctx.fill();
+      ctx.fillStyle = rows[i][2]; ctx.globalAlpha = .92;
+      U.rrect(ctx, x0, y, Math.max(8, bw * rows[i][1] / mx), 58, 6); ctx.fill();
+      ctx.restore();
+      U.mono(ctx, x0 + bw + 200, y + 30, F(rows[i][1], 1) + ' J', C.white, 22, 700);
+    }
+    U.mono(ctx, x0, 880, 'W ＝ Q外 ＋ Q内', C.goldL, 34, 700);
+    U.mono(ctx, x0 + 430, 872, 'EIt ＝ I²Rt ＋ I²rt', C.white, 22, 700);
+    U.mono(ctx, x0 + 430, 912, '除以 It → E ＝ IR ＋ Ir', C.cyan, 22, 700);
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['时间 t', F(t, 0) + ' s'],
+        ['电流 I', F(I, 2) + ' A'],
+        ['W = EIt', F(W, 1) + ' J'],
+        ['Q外 = I²Rt', F(Qo, 1) + ' J'],
+        ['Q内 = I²rt', F(Qi, 1) + ' J'],
+        ['W − Q外 − Q内', F(W - Qo - Qi, 2) + ' J', 'gold']
+      ],
+      formula: 'W = Q外 + Q内',
+      note: ['为什么能画等号', '电源转化出的电能只有两个去处：外电路和内电路。', '没有第三条路 —— 这就是能量守恒。']
+    });
+  }
+
+  function s7(ctx, st) {
+    var R = st.p, E = 6, r = 1.5, I = P.I(E, r, R), Uo = I * R, Ui = I * r;
+    title(ctx, 'I = E /(R + r)：电流由"三件套"一起决定', '拖外电阻，看电流怎么跟着变 —— 分母里永远有 r');
+
+    var bx = 200, by = 540, top = 330, bot = 770, rx = 720;
+    U.poly(ctx, [[bx, by - 74], [bx, top], [rx, top]], C.wire, 3.6);
+    U.poly(ctx, [[bx, by + 70], [bx, bot], [rx, bot]], C.wire, 3.6);
+    U.poly(ctx, [[rx, top], [rx, by - 100]], C.wire, 3.6);
+    U.poly(ctx, [[rx, by + 100], [rx, bot]], C.wire, 3.6);
+    U.resistorV(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
+    U.batteryV(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    U.meterCircle(ctx, 460, top, 42, 'A', C.wire);
+    U.mono(ctx, 460, top + 66, F(I, 2) + ' A', C.goldL, 19, 700, 'center');
+    if (st.anim) {
+      var sp = Math.max(.2, Math.min(1.6, I / 2.2));
+      U.flow(ctx, [[bx, by - 74], [bx, top], [rx, top], [rx, by - 100]], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [[rx, by + 100], [rx, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 64, 4.8);
+    }
+
+    var gx = 940, gy = 400, gw = 560, tot = R + r;
+    U.txt(ctx, gx, gy - 90, '分母 R + r = ' + F(tot, 1) + ' Ω', C.sub, 17, 600);
+    ctx.save();
+    ctx.fillStyle = C.gold; ctx.globalAlpha = .88;
+    U.rrect(ctx, gx, gy - 52, gw * R / tot, 62, 6); ctx.fill();
+    ctx.fillStyle = C.pos; ctx.globalAlpha = .88;
+    U.rrect(ctx, gx + gw * R / tot, gy - 52, gw * r / tot, 62, 6); ctx.fill();
+    ctx.restore();
+    if (gw * R / tot > 130) U.txt(ctx, gx + gw * R / tot / 2, gy - 20, '外 R', C.white, 17, 600, 'center');
+    if (gw * r / tot > 60) U.txt(ctx, gx + gw * R / tot + gw * r / tot / 2, gy - 20, '内 r', C.white, 15, 600, 'center');
+
+    var ax = 940, ay = 830, aw = 560, ah = 290, Rmax = 20, Imax = E / r, k, rr;
+    U.axis(ctx, ax, ay, ax + aw, ay - ah + 6, 'R / Ω', 'I / A');
+    var pts = [];
+    for (k = 0; k <= 90; k++) {
+      rr = 0.12 + (Rmax - 0.12) * k / 90;
+      pts.push([ax + aw * rr / Rmax, ay - (ah - 40) * P.I(E, r, rr) / Imax]);
+    }
+    U.poly(ctx, pts, C.cyan, 3.2);
+    var px = ax + aw * R / Rmax, py = ay - (ah - 40) * I / Imax;
+    U.line(ctx, ax, py, px, py, 'rgba(255,255,255,0.22)', 1.2, [6, 6]);
+    U.line(ctx, px, ay, px, py, 'rgba(255,255,255,0.22)', 1.2, [6, 6]);
+    U.dot(ctx, px, py, 9, C.gold, 12);
+    U.txt(ctx, ax + 16, ay - ah - 6, 'I 随 R 增大而减小', C.dim, 14, 400);
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['电动势 E', '6.00 V'],
+        ['内阻 r', '1.50 Ω'],
+        ['外电阻 R', F(R, 1) + ' Ω'],
+        ['电流 I = E/(R+r)', F(I, 2) + ' A', 'gold'],
+        ['路端电压 U = IR', F(Uo, 2) + ' V'],
+        ['内电压 Ir', F(Ui, 2) + ' V']
+      ],
+      formula: 'I = E /(R + r)',
+      note: ['适用条件', '只适用于外电路全是纯电阻。', '有电动机时要用 E = U外 + U内。']
+    });
+  }
+
+  function s8(ctx, st) {
+    var R = st.p, E = 6, r = 1.5, I = P.I(E, r, R), Uo = I * R, Ui = I * r;
+    title(ctx, 'U = E − Ir：负载变小，路端电压往下掉', '电压表量到的永远是路端电压 U，不是电动势 E');
+
+    var bx = 200, by = 560, top = 340, bot = 800, rx = 720;
+    U.poly(ctx, [[bx, by - 74], [bx, top], [rx, top]], C.wire, 3.6);
+    U.poly(ctx, [[bx, by + 70], [bx, bot], [rx, bot]], C.wire, 3.6);
+    U.poly(ctx, [[rx, top], [rx, by - 100]], C.wire, 3.6);
+    U.poly(ctx, [[rx, by + 100], [rx, bot]], C.wire, 3.6);
+    U.resistorV(ctx, rx, by, 200, 'R = ' + F(R, 1) + ' Ω', C.gold);
+    U.batteryV(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    if (st.anim) {
+      var sp = Math.max(.2, Math.min(1.6, I / 2.2));
+      U.flow(ctx, [[bx, by - 74], [bx, top], [rx, top], [rx, by - 100]], st.phase * sp, C.gold, 64, 4.8);
+      U.flow(ctx, [[rx, by + 100], [rx, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 64, 4.8);
+    }
+
+    U.poly(ctx, [[rx + 120, top], [rx + 120, 450], [rx + 250, 450]], C.wire, 2.8);
+    U.poly(ctx, [[rx + 120, bot], [rx + 120, 690], [rx + 250, 690]], C.wire, 2.8);
+    U.meterCircle(ctx, rx + 236, 570, 42, 'V', C.gold);
+    U.mono(ctx, rx + 236, 646, F(Uo, 2) + ' V', C.goldL, 21, 700, 'center');
+
+    var gx = 990, gy = 340, gw = 520;
+    U.txt(ctx, gx, gy - 46, 'E = 6.00 V，被分成两段', C.sub, 17, 600);
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.07)';
+    U.rrect(ctx, gx, gy, gw, 92, 8); ctx.fill();
+    ctx.fillStyle = C.gold; ctx.globalAlpha = .92;
+    U.rrect(ctx, gx, gy, gw * Uo / E, 92, 8); ctx.fill();
+    ctx.fillStyle = C.pos; ctx.globalAlpha = .92;
+    U.rrect(ctx, gx + gw * Uo / E, gy, gw * Ui / E, 92, 8); ctx.fill();
+    ctx.restore();
+    if (gw * Uo / E > 170) U.txt(ctx, gx + gw * Uo / E / 2, gy + 46, 'U外 = ' + F(Uo, 2) + ' V', C.white, 20, 700, 'center');
+    if (gw * Ui / E > 90) U.txt(ctx, gx + gw * Uo / E + gw * Ui / E / 2, gy + 46, 'Ir', C.white, 18, 700, 'center');
+
+    var ax = 990, ay = 830, aw = 520, ah = 260, Rmax = 20;
+    U.axis(ctx, ax, ay, ax + aw, ay - ah + 6, 'R / Ω', 'U / V');
+    var pts = [], k, rr;
+    for (k = 0; k <= 90; k++) {
+      rr = 0.12 + (Rmax - 0.12) * k / 90;
+      pts.push([ax + aw * rr / Rmax, ay - (ah - 34) * P.Uext(E, r, rr) / (E * 1.06)]);
+    }
+    U.poly(ctx, pts, C.cyan, 3.2);
+    var px = ax + aw * R / Rmax, py = ay - (ah - 34) * Uo / (E * 1.06);
+    U.dot(ctx, px, py, 9, C.gold, 12);
+    U.txt(ctx, ax + 16, ay - ah - 6, 'R 变大，U 回到 E', C.dim, 14, 400);
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['外电阻 R', F(R, 1) + ' Ω'],
+        ['电流 I', F(I, 2) + ' A'],
+        ['路端电压 U = E − Ir', F(Uo, 2) + ' V', 'gold'],
+        ['内电压 Ir', F(Ui, 2) + ' V'],
+        ['U + Ir', F(Uo + Ui, 2) + ' V']
+      ],
+      formula: 'U = E − Ir',
+      note: ['回到开头', '灯越多 → R 越小 → I 越大 → Ir 越大 → U 越小。', '灯泡变暗的原因就在这一行。']
+    });
+  }
+
+  function s9(ctx, st) {
+    var E = 6, r = 1.5, Isc = E / r, I = st.p, Uo = E - I * r, R = P.RofI(E, r, I);
+    title(ctx, 'U-I 图：一条直线，三个数一次读全', 'U = −rI + E 就是 y = kx + b');
+
+    var ax = 180, ay = 850, aw = 1150, ah = 620, Imax = Isc * 1.10;
+    U.axis(ctx, ax, ay, ax + aw, ay - ah + 20, 'I / A', 'U / V');
+    U.grid(ctx, ax, ay, ax + aw, ay - ah + 20, 11, 7);
+    function X(i) { return ax + aw * i / Imax; }
+    function Y(u) { return ay - (ah - 40) * u / (E * 1.10); }
+    U.line(ctx, X(0), Y(E), X(Isc), Y(0), C.cyan, 3.6);
+    U.dot(ctx, X(0), Y(E), 9, C.gold, 12);
+    U.txt(ctx, X(0) + 18, Y(E) - 6, 'E = ' + F(E, 1) + ' V（纵截距）', C.goldL, 19, 700);
+    U.dot(ctx, X(Isc), Y(0), 9, C.pos, 12);
+    U.txt(ctx, X(Isc) - 10, Y(0) + 34, 'I短 = E/r = ' + F(Isc, 1) + ' A（横截距）', C.posL, 19, 700, 'right');
+    U.txt(ctx, ax - 14, ay + 26, 'O', C.dim, 16, 400);
+
+    var px = X(I), py = Y(Uo);
+    U.line(ctx, ax, py, px, py, 'rgba(255,255,255,0.26)', 1.4, [7, 6]);
+    U.line(ctx, px, ay, px, py, 'rgba(255,255,255,0.26)', 1.4, [7, 6]);
+    U.dot(ctx, px, py, 11, C.white, 14);
+    U.txt(ctx, px + 18, py - 30, 'U = ' + F(Uo, 2) + ' V，I = ' + F(I, 2) + ' A', C.white, 17, 600);
+
+    var i2 = Math.min(Isc * 0.88, I + 2.0), u2 = E - i2 * r;
+    U.line(ctx, px, py, X(i2), py, C.gold, 1.8, [5, 5]);
+    U.line(ctx, X(i2), py, X(i2), Y(u2), C.gold, 1.8, [5, 5]);
+    U.txt(ctx, (px + X(i2)) / 2, py + 26, 'ΔI', C.gold, 15, 600, 'center');
+    U.txt(ctx, X(i2) + 14, (py + Y(u2)) / 2, 'ΔU', C.gold, 15, 600);
+    U.txt(ctx, X(i2) + 14, (py + Y(u2)) / 2 + 28, 'ΔU/ΔI = r', C.goldL, 15, 600);
+
+    panel({
+      kicker: '三个读数',
+      rows: [
+        ['纵截距 → E', F(E, 1) + ' V', 'gold'],
+        ['斜率绝对值 → r', F(r, 2) + ' Ω', 'gold'],
+        ['横截距 → I短', F(Isc, 1) + ' A', 'gold'],
+        ['当前 I', F(I, 2) + ' A'],
+        ['当前 U', F(Uo, 2) + ' V'],
+        ['对应 R = U/I', F(R, 1) + ' Ω']
+      ],
+      formula: 'U = −rI + E',
+      note: ['三个问题', '① 为什么是直线？一次函数。', '② 纵截距：断路，U = E。', '③ 横截距不是无穷大，是 E/r。']
+    });
+  }
+
+  function s10(ctx, st) {
+    var E = 6, r = 1.5, on = st.sw, R = on ? st.p : Infinity;
+    var I = on ? P.I(E, r, R) : 0;
+    var Uo = on ? I * R : E, Ui = I * r;
+    var shorted = on && R <= 0.051;
+    title(ctx, on ? '短路：外电阻为零，电流只剩 E/r' : '断路：没有电流，路端电压就是电动势',
+      on ? '把外电阻拖到 0，看电流表冲到多少 —— 这就是"绝对不许短接"的原因' : '开关断开，外电路没有电流');
+
+    var bx = 200, by = 580, top = 350, bot = 810, rx = 700;
+    U.poly(ctx, [[bx, by - 74], [bx, top], [rx, top]], C.wire, 3.6);
+    U.poly(ctx, [[bx, by + 70], [bx, bot], [rx, bot]], C.wire, 3.6);
+    U.poly(ctx, [[rx, top], [rx, top + 70]], C.wire, 3.6);
+    U.dot(ctx, rx, top + 70, 7, C.wire, 0);
+    U.dot(ctx, rx, by - 100, 7, C.wire, 0);
+    if (on) U.line(ctx, rx, top + 70, rx, by - 100, C.wire, 3.6);
+    else U.line(ctx, rx, top + 70, rx + 96, top + 34, C.wire, 3.6);
+    U.txt(ctx, rx + 108, top + 40, 'K', C.sub, 19, 700);
+    U.poly(ctx, [[rx, by - 100], [rx, by + 100]], C.wire, 3.6);
+    if (on && !shorted) {
+      U.poly(ctx, [[rx, by - 100], [rx + 210, by - 100], [rx + 210, by + 100], [rx, by + 100]], C.wire, 3.6);
+      U.resistorV(ctx, rx + 210, by, 200, null, C.gold);
+      U.txt(ctx, rx + 210, by - 132, 'R = ' + F(R, 1) + ' Ω', C.sub, 15, 600, 'center');
+    }
+    if (shorted) U.txt(ctx, rx + 40, by, '导线直接连起来', C.red, 18, 700);
+    U.batteryV(ctx, bx, by, '电源', 'E = 6 V', 'r = 1.5 Ω');
+    if (st.anim && I > 0) {
+      var sp = Math.max(.3, Math.min(2, I / 2.2));
+      U.flow(ctx, [[bx, by - 74], [bx, top], [rx, top]], st.phase * sp, C.gold, 60, 5);
+      U.flow(ctx, [[rx, bot], [bx, bot], [bx, by + 70]], st.phase * sp, C.gold, 60, 5);
+    }
+
+    var mx = 1060;
+    U.meterCircle(ctx, mx, 420, 96, 'A', shorted ? C.red : C.wire);
+    U.mono(ctx, mx, 552, F(I, 3) + ' A', shorted ? C.red : C.goldL, 40, 700, 'center');
+    U.txt(ctx, mx, 600, '电流表读数', C.dim, 15, 400, 'center');
+
+    var ty = 690;
+    if (shorted) {
+      U.txt(ctx, mx, ty, '危险：R = 0 时 I = E/r', C.red, 21, 700, 'center');
+      U.txt(ctx, mx, ty + 40, '干电池 E=1.5 V、r≈0.5 Ω → 约 3 A', C.sub, 16, 400, 'center');
+      U.txt(ctx, mx, ty + 72, '铅蓄电池 r=0.005~0.1 Ω → 数百安', C.sub, 16, 400, 'center');
+      U.txt(ctx, mx, ty + 112, '绝对不允许把电源两极短接！', C.red, 18, 700, 'center');
+    } else if (!on) {
+      U.txt(ctx, mx, ty, 'I = 0，Ir = 0，所以 U = E', C.negL, 21, 700, 'center');
+      U.txt(ctx, mx, ty + 42, '测电动势：不接负载，把表接在电源两端', C.sub, 16, 400, 'center');
+    } else {
+      U.txt(ctx, mx, ty, 'R 越小，I 越大，U 越小', C.sub, 18, 700, 'center');
+    }
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['开关 K', on ? '闭合' : '断开'],
+        ['外电阻 R', on ? F(R, 2) + ' Ω' : '∞（断路）'],
+        ['电流 I', F(I, 3) + ' A', shorted ? 'warn' : 'gold'],
+        ['路端电压 U', F(Uo, 2) + ' V'],
+        ['短路电流 E/r', F(E / r, 2) + ' A']
+      ],
+      formula: shorted ? 'I = E / r' : '断路 U = E；短路 I = E/r',
+      note: ['两个端点', '断路：I = 0，U = E。', '短路：I = E/r，是有限值，但很大。']
+    });
+  }
+
+  function s11(ctx, st) {
+    var E = 6, r = 1.5, R = st.p;
+    var I = P.I(E, r, R), Po = I * I * R, Pa = E * I, Pi = I * I * r;
+    var Pm = P.Pmax(E, r), eta = R / (R + r);
+    title(ctx, '输出功率最大 ≠ 效率最高', 'R = r 时输出最大，可效率只有 50%');
+
+    var ax = 150, ay = 830, aw = 720, ah = 520, Rmax = 8, k, rr;
+    U.axis(ctx, ax, ay, ax + aw, ay - ah + 10, 'R / Ω', 'P / W');
+    U.grid(ctx, ax, ay, ax + aw, ay - ah + 10, 8, 6);
+    var pts = [];
+    for (k = 0; k <= 120; k++) {
+      rr = 0.02 + (Rmax - 0.02) * k / 120;
+      pts.push([ax + aw * rr / Rmax, ay - (ah - 40) * P.Pout(E, r, rr) / (Pm * 1.18)]);
+    }
+    U.poly(ctx, pts, C.cyan, 3.4);
+    var xm = ax + aw * r / Rmax, ym = ay - (ah - 40) * Pm / (Pm * 1.18);
+    U.line(ctx, xm, ay, xm, ym, 'rgba(255,255,255,0.22)', 1.4, [6, 6]);
+    U.dot(ctx, xm, ym, 9, C.gold, 12);
+    U.txt(ctx, xm + 16, ym - 24, 'R = r：P出max = E²/4r = ' + F(Pm, 2) + ' W', C.goldL, 18, 700);
+    var px = ax + aw * R / Rmax, py = ay - (ah - 40) * Po / (Pm * 1.18);
+    U.dot(ctx, px, py, 11, C.white, 14);
+    U.line(ctx, ax, py, px, py, 'rgba(255,255,255,0.22)', 1.2, [6, 6]);
+    U.txt(ctx, px, py - 30, 'P出 = ' + F(Po, 2) + ' W', C.white, 17, 700, 'center');
+
+    var gx = 980, gy = 330, gw = 520;
+    U.txt(ctx, gx, gy - 60, '总功率 P总 = EI = ' + F(Pa, 2) + ' W', C.white, 18, 600);
+    ctx.save();
+    ctx.fillStyle = C.gold; ctx.globalAlpha = .92;
+    U.rrect(ctx, gx, gy, gw * Po / Pa, 84, 8); ctx.fill();
+    ctx.fillStyle = C.pos; ctx.globalAlpha = .92;
+    U.rrect(ctx, gx + gw * Po / Pa, gy, gw * Pi / Pa, 84, 8); ctx.fill();
+    ctx.restore();
+    if (gw * Po / Pa > 170) U.txt(ctx, gx + gw * Po / Pa / 2, gy + 42, '输出 ' + F(Po, 2) + ' W', C.white, 17, 700, 'center');
+    if (gw * Pi / Pa > 90) U.txt(ctx, gx + gw * Po / Pa + gw * Pi / Pa / 2, gy + 42, '内耗', C.white, 15, 700, 'center');
+    U.mono(ctx, gx, gy + 160, 'η = ' + (eta * 100).toFixed(0) + ' %', C.cyan, 40, 700);
+    U.txt(ctx, gx, gy + 216, 'η = P出/P总 = R/(R+r)', C.sub, 16, 400);
+    U.txt(ctx, gx, gy + 262, R < r - 0.05 ? 'R < r：电流大，大半烧在内阻上' :
+      (Math.abs(R - r) < 0.06 ? '正好 R = r：输出最大，效率只有 50%' : 'R > r：输出少些，效率更高'), C.dim, 16, 400);
+
+    panel({
+      kicker: '读数',
+      rows: [
+        ['外电阻 R', F(R, 2) + ' Ω'],
+        ['电流 I', F(I, 2) + ' A'],
+        ['总功率 EI', F(Pa, 2) + ' W'],
+        ['输出功率 I²R', F(Po, 2) + ' W', 'gold'],
+        ['内耗 I²r', F(Pi, 2) + ' W'],
+        ['效率 η', (eta * 100).toFixed(0) + ' %']
+      ],
+      formula: 'P出 = E²R /(R+r)²',
+      note: ['一句话', '"出最大力气"和"最省电"是两件矛盾的事。', '输电要效率，功放要最大输出。']
+    });
+  }
+
+  function s12(ctx, st) {
+    title(ctx, '一纵一横，这一节收成三条线', '能量线为什么成立、电路线怎么算、图像线怎么读');
+
+    var cols = [
+      ['能量线', C.gold, ['W = Eq = EIt', 'Q外 = I²Rt', 'Q内 = I²rt', 'W = Q外 + Q内', 'E = IR + Ir']],
+      ['电路线', C.negL, ['I = E/(R+r)', 'E = U外 + U内', 'U = E − Ir', 'R↓ → I↑ → U↓', '断路 U=E，短路 I=E/r']],
+      ['图像线', C.posL, ['U = −rI + E', '纵截距 → E', '斜率 → r', '横截距 → E/r', 'R = r 时 P出 最大']]
+    ];
+    var i, j, x, y = 240, w = 470, h = 470;
+    for (i = 0; i < 3; i++) {
+      x = 60 + i * 510;
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,0.035)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+      ctx.lineWidth = 1;
+      U.rrect(ctx, x, y, w, h, 16); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = cols[i][1];
+      U.rrect(ctx, x, y, 6, h, 3); ctx.fill();
+      ctx.restore();
+      U.txt(ctx, x + 34, y + 48, cols[i][0], cols[i][1], 24, 700);
+      for (j = 0; j < cols[i][2].length; j++) {
+        U.txt(ctx, x + 34, y + 118 + j * 70, cols[i][2][j], j === 0 ? C.white : C.sub, 20, j === 0 ? 700 : 400);
+      }
+    }
+    U.txt(ctx, 60, 790, '三个最常错的地方', C.red, 19, 700);
+    U.txt(ctx, 60, 838, '✗ "电动势就是电压" —— 只有断路时 U 才等于 E', C.sub, 17, 400);
+    U.txt(ctx, 60, 878, '✗ "电源没有内阻" —— 内阻是 U 随负载变化的全部原因', C.sub, 17, 400);
+    U.txt(ctx, 60, 918, '✗ "并联互不影响" —— 灯越多，电池两端越"软"', C.sub, 17, 400);
+
+    panel({
+      kicker: '这一节的主线',
+      rows: [
+        ['能量线', 'E = IR + Ir'],
+        ['电路线', 'I = E/(R+r)'],
+        ['图像线', 'U = −rI + E'],
+        ['三读', 'E ｜ r ｜ E/r', 'gold']
+      ],
+      formula: 'W = Q外 + Q内 → E = IR + Ir',
+      note: ['拓展：欧姆表', '电流表 + 电源：Ig = E/RΩ。', 'Ix 与 Rx 不是线性关系 → 电阻刻度不均匀。']
+    });
+  }
+
+  g.RENDER.scenes = { s1: s1, s2: s2, s3: s3, s4: s4, s5: s5, s6: s6,
+    s7: s7, s8: s8, s9: s9, s10: s10, s11: s11, s12: s12 };
+})(window);
+</script>
+<script>
+(function (g) {
+  'use strict';
+
+  g.STEPS = [
+    { act: '第 1 幕 · 先看见问题', nav: '1', scene: 's1',
+      title: '多接一盏灯，为什么每盏都变暗？',
+      hint: '拖动 <b>并联的灯数 n</b>：1 盏 → 4 盏，看每盏灯的电流和亮度柱',
+      p: { label: '并联的灯数 n', min: 1, max: 4, step: 1, val: 1, unit: ' 盏', fmt: 0 } },
+
+    { act: '第 1 幕 · 先看见问题', nav: '2', scene: 's2',
+      title: '再串一节旧电池：电动势翻倍，灯却更暗',
+      hint: '拖动 <b>旧电池内阻 r旧</b>：拖到 5 Ω 以上，灯泡就开始比一节新电池时更暗',
+      p: { label: '旧电池内阻 r旧', min: 0.5, max: 12, step: 0.1, val: 6, unit: ' Ω', fmt: 1 } },
+
+    { act: '第 2 幕 · 电动势', nav: '3', scene: 's3',
+      title: '电源内部：静电力拦路，非静电力搬人',
+      hint: '拖动 <b>搬运进度</b>：看正电荷被推到哪里、电势能柱怎么长高',
+      p: { label: '搬运进度', min: 0, max: 1, step: 0.01, val: 0.35, pct: true, fmt: 0 } },
+
+    { act: '第 2 幕 · 电动势', nav: '4', scene: 's4',
+      title: 'E = W/q：每搬 1 C 能做多少功',
+      hint: '拖动 <b>搬运的电荷量 q</b>：功 W 成比例地变，W/q 一直不变',
+      p: { label: '搬运的电荷量 q', min: 1, max: 6, step: 0.5, val: 3, unit: ' C', fmt: 1 } },
+
+    { act: '第 3 幕 · 闭合电路欧姆定律', nav: '5', scene: 's5',
+      title: '沿电流走一圈：电势一路往下掉',
+      hint: '拖动 <b>外电阻 R</b>：外电路那段降得多、内电路那段降得少，两段之和始终是 E',
+      p: { label: '外电阻 R', min: 0.5, max: 12, step: 0.1, val: 4.5, unit: ' Ω', fmt: 1 } },
+
+    { act: '第 3 幕 · 闭合电路欧姆定律', nav: '6', scene: 's6',
+      title: '三笔账：给出去的 = 两边烧掉的',
+      hint: '拖动 <b>通电时间 t</b>：三根能量条一起变长，等号永远成立',
+      p: { label: '通电时间 t', min: 0, max: 60, step: 1, val: 10, unit: ' s', fmt: 0 } },
+
+    { act: '第 3 幕 · 闭合电路欧姆定律', nav: '7', scene: 's7',
+      title: 'I = E/(R+r)：电流由"三件套"一起决定',
+      hint: '拖动 <b>外电阻 R</b>：分母条里外电阻和内阻的比例在变，电流跟着动',
+      p: { label: '外电阻 R', min: 0.5, max: 20, step: 0.1, val: 4.5, unit: ' Ω', fmt: 1 } },
+
+    { act: '第 4 幕 · 路端电压与图像', nav: '8', scene: 's8',
+      title: 'U = E − Ir：负载变小，路端电压往下掉',
+      hint: '拖动 <b>负载电阻 R</b>：电压表读数跟着掉，E 被切成两段的比例在变',
+      p: { label: '负载电阻 R', min: 0.5, max: 20, step: 0.1, val: 4.5, unit: ' Ω', fmt: 1 } },
+
+    { act: '第 4 幕 · 路端电压与图像', nav: '9', scene: 's9',
+      title: 'U-I 图：一条直线，三个数一次读全',
+      hint: '拖动 <b>工作点电流 I</b>：工作点沿直线滑动，ΔU/ΔI 始终等于内阻 r',
+      p: { label: '工作点电流 I', min: 0, max: 3.9, step: 0.05, val: 1, unit: ' A', fmt: 2 } },
+
+    { act: '第 4 幕 · 路端电压与图像', nav: '10', scene: 's10',
+      title: '断路与短路：两个端点',
+      hint: '拖动 <b>外电阻 R</b> 到 0 看短路；点 <b>开关 K</b> 看断路时 U = E',
+      allow: { p: true, sw: true },
+      p: { label: '外电阻 R', min: 0, max: 12, step: 0.1, val: 3, unit: ' Ω', fmt: 1 } },
+
+    { act: '第 5 幕 · 功率与效率', nav: '11', scene: 's11',
+      title: '输出功率最大 ≠ 效率最高',
+      hint: '拖动 <b>外电阻 R</b>：越过 R = r 那一点，输出功率掉下来，效率却还在升',
+      p: { label: '外电阻 R', min: 0.2, max: 8, step: 0.05, val: 3, unit: ' Ω', fmt: 2 } },
+
+    { act: '第 6 幕 · 收束', nav: '12', scene: 's12',
+      title: '一纵一横：三条线其实是一件事',
+      hint: '这一屏不拖：按 <b>⛶ 全屏</b> 把三条线铺满整块屏幕，带学生一起念一遍',
+      p: null }
+  ];
+
+  g.STEPS.forEach(function (s, i) {
+    s.idx = i;
+    if (!s.allow) s.allow = s.p ? { p: true } : {};
+    if (s.p && s.p.val == null) s.p.val = s.p.min;
+  });
+})(window);
+</script>
+<script>
+(function (g) {
+  'use strict';
+
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var S = g.STEPS, R = g.RENDER;
+  var cur = 0, P = {}, SW = {}, phase = 0, focus = false;
+  var animOn = true, phaseFrozen = null;
+  var stage = document.getElementById('stage');
+  var view = document.getElementById('view');
+
+  var narrow = false, sc = 1, cw = 1600, chh = 1000;
+  function fit() {
+    var W = window.innerWidth, H = window.innerHeight;
+    narrow = W < 900;
+    var s = narrow ? W / 1920 : Math.min(W / 1920, H / 1080);
+    stage.style.transform = 'scale(' + s + ')';
+    stage.style.left = ((W - 1920 * s) / 2) + 'px';
+    stage.style.top = (narrow ? 8 : (H - 1080 * s) / 2) + 'px';
+    document.body.classList.toggle('narrow', narrow);
+    var tip = document.getElementById('rotTip');
+    if (tip) tip.style.display = (narrow && H > W) ? 'block' : 'none';
+    resizeCanvas();
+  }
+  window.addEventListener('resize', fit);
+
+  function resizeCanvas() {
+    var box = view.getBoundingClientRect();
+    var s = stage.getBoundingClientRect().width / 1920 || 1;
+    cw = Math.max(320, Math.round(box.width / s));
+    chh = Math.max(200, Math.round(box.height / s));
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(cw * dpr);
+    cv.height = Math.round(chh * dpr);
+    cv.style.width = cw + 'px';
+    cv.style.height = chh + 'px';
+    mapT();
+  }
+
+  var K = 1, OX = 0, OY = 0, DPR = 1;
+  function mapT() {
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    K = Math.min(cw / R.W, chh / R.H);
+    OX = (cw - R.W * K) / 2;
+    OY = (chh - R.H * K) / 2;
+    ctx.setTransform(DPR * K, 0, 0, DPR * K, DPR * OX, DPR * OY);
+  }
+
+  var toc = document.getElementById('toc');
+  S.forEach(function (s, i) {
+    if (i && s.act !== S[i - 1].act) {
+      var sp = document.createElement('span'); sp.className = 'sep'; toc.appendChild(sp);
+    }
+    var b = document.createElement('button');
+    b.textContent = s.nav;
+    b.title = s.title;
+    b.onclick = function () { go(i); };
+    toc.appendChild(b);
+  });
+
+  function value() {
+    var d = S[cur].p;
+    if (!d) return 0;
+    if (P[cur] == null) P[cur] = d.val;
+    return P[cur];
+  }
+  function state() {
+    var st = { p: value(), phase: (phaseFrozen == null ? phase : phaseFrozen), anim: animOn && !narrow };
+    if (S[cur].scene === 's1') st.n = Math.round(st.p);
+    if (S[cur].allow && S[cur].allow.sw) st.sw = SW[cur] !== false;
+    return st;
+  }
+
+  function draw() {
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    mapT();
+    ctx.save();
+    R.panel = null;
+    var fn = R.scenes[S[cur].scene];
+    if (fn) fn(ctx, state(), S[cur]);
+    ctx.restore();
+    paintPanel();
+    paintBar();
+  }
+
+  function paintPanel() {
+    var p = R.panel || {};
+    var rows = p.rows || [];
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      html += '<div class="row"><span>' + r[0] + '</span><b' + (r[2] ? ' class="' + r[2] + '"' : '') + '>' + r[1] + '</b></div>';
+    }
+    if (p.formula) html += '<div class="fml">' + p.formula + '</div>';
+    if (p.note) {
+      html += '<div class="nte"><h4>' + p.note[0] + '</h4>';
+      for (var j = 1; j < p.note.length; j++) html += '<p>' + p.note[j] + '</p>';
+      html += '</div>';
+    }
+    document.getElementById('railbody').innerHTML = html;
+  }
+
+  function paintBar() {
+    document.getElementById('cnt').textContent = (cur + 1) + ' / ' + S.length;
+    document.getElementById('actName').textContent = S[cur].act;
+    document.getElementById('hint').innerHTML = S[cur].hint;
+    document.getElementById('railTitle').textContent = (R.panel && R.panel.kicker) || '读数';
+    var bs = toc.querySelectorAll('button');
+    for (var i = 0; i < bs.length; i++) bs[i].className = (i === cur ? 'on' : '');
+  }
+
+  var rng = document.getElementById('pRange');
+  var pLab = document.getElementById('pLab');
+  var pVal = document.getElementById('pVal');
+  var ctl = document.getElementById('ctl');
+  var btnSw = document.getElementById('btnSw');
+
+  function paintVal() {
+    var d = S[cur].p; if (!d) return;
+    var v = value();
+    pVal.innerHTML = (d.pct ? (v * 100).toFixed(0) : v.toFixed(d.fmt)) +
+      '<i>' + (d.unit || (d.pct ? '%' : '')) + '</i>';
+  }
+  function syncCtl() {
+    var d = S[cur].p;
+    if (!d) { ctl.style.display = 'none'; }
+    else {
+      ctl.style.display = 'flex';
+      pLab.textContent = d.label;
+      rng.min = d.min; rng.max = d.max; rng.step = d.step; rng.value = value();
+      paintVal();
+      var dis = !(S[cur].allow && S[cur].allow.p);
+      rng.disabled = dis;
+      ctl.classList.toggle('off', dis);
+    }
+    var hasSw = S[cur].allow && S[cur].allow.sw;
+    btnSw.style.display = hasSw ? 'inline-block' : 'none';
+    if (hasSw) {
+      btnSw.className = 'mk' + (SW[cur] !== false ? ' on' : '');
+      btnSw.textContent = '开关 K：' + (SW[cur] !== false ? '闭合' : '断开');
+    }
+  }
+  rng.addEventListener('input', function () {
+    if (!S[cur].p) return;
+    P[cur] = +rng.value; paintVal(); draw();
+  });
+  btnSw.onclick = function () { SW[cur] = SW[cur] === false ? true : false; syncCtl(); draw(); };
+
+  function go(i) {
+    cur = Math.max(0, Math.min(S.length - 1, i));
+    if (P[cur] == null && S[cur].p) P[cur] = S[cur].p.val;
+    if (SW[cur] == null) SW[cur] = true;
+    syncCtl(); draw();
+  }
+  document.getElementById('btnPrev').onclick = function () { go(cur - 1); };
+  document.getElementById('btnNext').onclick = function () { go(cur + 1); };
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { go(cur + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(cur - 1); e.preventDefault(); }
+    if (e.key === 'f' || e.key === 'F') setFocus(!focus);
+    if (e.key === 'Escape' && focus) setFocus(false);
+  });
+
+  function setFocus(on) {
+    focus = !!on;
+    document.body.classList.toggle('fs', focus);
+    if (focus) {
+      if (document.documentElement.requestFullscreen) {
+        try { document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
+      }
+    } else if (document.fullscreenElement && document.exitFullscreen) {
+      try { document.exitFullscreen().catch(function () {}); } catch (e) {}
+    }
+    setTimeout(function () { fit(); draw(); }, 70);
+    var b = document.getElementById('btnFs');
+    b.textContent = focus ? '⛶ 退出全屏' : '⛶ 全屏';
+    b.classList.toggle('pri', focus);
+  }
+  document.getElementById('btnFs').onclick = function (e) { e.stopPropagation(); setFocus(!focus); };
+  view.addEventListener('click', function () { if (focus) setFocus(false); });
+  document.addEventListener('fullscreenchange', function () {
+    if (!document.fullscreenElement && focus) setFocus(false);
+  });
+
+  g.__viz = {
+    selfTest: function () {
+      var r = g.PHY.runSelfTest();
+      var bad = [];
+      S.forEach(function (s) {
+        var allow = s.allow || {};
+        if (/拖动/.test(s.hint) && !allow.p) bad.push(s.nav + ': hint 说能拖但 allow 无 p');
+        if (/开关/.test(s.hint) && !allow.sw) bad.push(s.nav + ': hint 说开关但 allow 无 sw');
+        if (allow.p && !s.p) bad.push(s.nav + ': allow.p 缺 p 定义');
+        if (allow.sw && !/开关/.test(s.hint)) bad.push(s.nav + ': allow.sw 但 hint 未提开关');
+        if (s.p) {
+          if (!(s.p.min < s.p.max)) bad.push(s.nav + ': p 区间非法');
+          if (s.p.val < s.p.min || s.p.val > s.p.max) bad.push(s.nav + ': p 初值越界');
+          if (!(s.p.step > 0)) bad.push(s.nav + ': p 步长非法');
+        }
+        if (!g.RENDER.scenes[s.scene]) bad.push(s.nav + ': 场景 ' + s.scene + ' 不存在');
+      });
+      r.interactionMismatch = bad;
+      r.steps = S.length;
+      r.pass = r.pass && bad.length === 0;
+      return r;
+    },
+    go: go,
+    setP: function (v) {
+      var d = S[cur].p; if (!d) return;
+      P[cur] = Math.max(d.min, Math.min(d.max, +v)); rng.value = P[cur]; paintVal(); draw();
+    },
+    setSw: function (v) { SW[cur] = !!v; syncCtl(); draw(); },
+    setFocus: setFocus,
+    freeze: function (on, ph) { animOn = !on; phaseFrozen = (on && ph != null) ? ph : null; draw(); },
+    isFocus: function () { return focus; },
+    state: state,
+    hash: function () {
+      var d = cv.toDataURL('image/png'), h = 2166136261;
+      for (var i = 0; i < d.length; i += 3) { h ^= d.charCodeAt(i); h = (h * 16777619) >>> 0; }
+      return h.toString(16);
+    },
+    box: function () { return { w: cw, h: chh, k: K }; }
+  };
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function loop() {
+    if (!reduce && animOn) { phase += 0.006; draw(); }
+    requestAnimationFrame(loop);
+  }
+
+  fit(); go(0); requestAnimationFrame(loop);
+})(window);
+</script>
+</body>
+</html>
