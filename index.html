@@ -859,9 +859,9 @@
     var E = 6, r = 1.5, Isc = E / r, I = st.p, Uo = E - I * r, R = P.RofI(E, r, I);
     title(ctx, 'U-I 图：一条直线，三个数一次读全', 'U = −rI + E 就是 y = kx + b');
 
-    var ax = 180, ay = 850, aw = 1150, ah = 620, Imax = Isc * 1.10;
+    var ax = 180, ay = 860, aw = 1300, ah = 650, Imax = Isc * 1.10;
     U.axis(ctx, ax, ay, ax + aw, ay - ah + 20, 'I / A', 'U / V');
-    U.grid(ctx, ax, ay, ax + aw, ay - ah + 20, 11, 7);
+    U.grid(ctx, ax, ay, ax + aw, ay - ah + 20, 12, 7);
     function X(i) { return ax + aw * i / Imax; }
     function Y(u) { return ay - (ah - 40) * u / (E * 1.10); }
     U.line(ctx, X(0), Y(E), X(Isc), Y(0), C.cyan, 3.6);
