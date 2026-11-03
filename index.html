@@ -344,7 +344,7 @@
     return [q.x0 + q.dx, q.y0 + q.dy];
   }
 
-  var FLOW_SPEED = 100;
+  var FLOW_SPEED = 150;
   function flow(ctx, pts, arg, color, gap, r) {
     var s = segs(pts), L = s.len;
     r = r || 4.6;
@@ -1353,7 +1353,8 @@
     return P[cur];
   }
   function state() {
-    var st = { p: value(), phase: (phaseFrozen == null ? phase : phaseFrozen), anim: animOn && !narrow };
+
+    var st = { p: value(), phase: (phaseFrozen == null ? phase : phaseFrozen), anim: animOn };
     if (S[cur].scene === 's1') st.n = Math.round(st.p);
     if (S[cur].allow && S[cur].allow.sw) st.sw = SW[cur] !== false;
     return st;
@@ -1610,13 +1611,13 @@
     flowSpeed: function () { return R.FLOW_SPEED; }
   };
 
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var lastT = null;
   function loop(now) {
     if (lastT == null) lastT = now;
     var dt = Math.min(0.05, (now - lastT) / 1000);
     lastT = now;
-    if (!reduce && animOn) { phase += dt; draw(); }
+
+    if (animOn) { phase += dt; draw(); }
     requestAnimationFrame(loop);
   }
 
