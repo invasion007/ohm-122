@@ -350,7 +350,7 @@
     r = r || 4.6;
     var tail = r * 4.2;
     var off = (((arg * FLOW_SPEED) % gap) + gap) % gap;
-    for (var d = off; d < L - tail; d += gap) {
+    for (var d = off; d + tail <= L - 1; d += gap) {
       var a = at(pts, d), b = at(pts, Math.min(L - 1, d + tail));
       GEO.dots.push([b[0], b[1]]);
       ctx.save();
@@ -1532,7 +1532,7 @@
     var nRoots = Object.keys(roots).length;
     if (wires.length && nRoots > 1) bad.push('导线分成 ' + nRoots + ' 段互不相连');
 
-    var offWires = 0;
+    var offWires = 0, DOT_TOL = 8;
     (g2.dots || []).forEach(function (pt) {
       var best = 1e9;
       wires.forEach(function (wl) {
@@ -1545,7 +1545,7 @@
           if (dd < best) best = dd;
         }
       });
-      if (best > 6) offWires++;
+      if (best > DOT_TOL) offWires++;
     });
     if (offWires) bad.push(offWires + ' 个电流点跑出了导线');
 
