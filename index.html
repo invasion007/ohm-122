@@ -247,8 +247,8 @@
 
   var W = 1600, H = 1000;
 
-  var GEO = { wires: [], terms: [], bodies: [] };
-  function geoReset() { GEO = { wires: [], terms: [], bodies: [] }; }
+  var GEO = { wires: [], terms: [], bodies: [], dots: [] };
+  function geoReset() { GEO = { wires: [], terms: [], bodies: [], dots: [] }; }
   function geoTerm(x, y) { GEO.terms.push([x, y]); return [x, y]; }
   function geoBody(b) { GEO.bodies.push(b); }
 
@@ -343,12 +343,22 @@
     q = s.seg[s.seg.length - 1];
     return [q.x0 + q.dx, q.y0 + q.dy];
   }
-  function flow(ctx, pts, phase, color, gap, r) {
+
+  var FLOW_SPEED = 100;
+  function flow(ctx, pts, arg, color, gap, r) {
     var s = segs(pts), L = s.len;
-    var off = ((phase * 60) % gap + gap) % gap;
-    for (var d = off; d < L - 10; d += gap) {
-      var p = at(pts, d);
-      dot(ctx, p[0], p[1], r || 4.6, color, 9);
+    r = r || 4.6;
+    var tail = r * 4.2;
+    var off = (((arg * FLOW_SPEED) % gap) + gap) % gap;
+    for (var d = off; d < L - tail; d += gap) {
+      var a = at(pts, d), b = at(pts, Math.min(L - 1, d + tail));
+      GEO.dots.push([b[0], b[1]]);
+      ctx.save();
+      ctx.strokeStyle = color; ctx.lineWidth = r * 1.5; ctx.lineCap = 'round';
+      ctx.globalAlpha = .85;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      ctx.restore();
+      dot(ctx, b[0], b[1], r, color, 10);
     }
   }
 
@@ -473,13 +483,9 @@
     geoBody({ type: 'rect', x: x0, y: y - 46, w: x1 - x0, h: 60 });
     line(ctx, x0, y, x0 + (x1 - x0) * 0.18, y, C.wire, 3.6);
     line(ctx, x1 - (x1 - x0) * 0.18, y, x1, y, C.wire, 3.6);
-    ctx.save();
-    ctx.strokeStyle = C.wire; ctx.lineWidth = 3.6; ctx.lineCap = 'round';
-    ctx.beginPath();
-    if (closed) { ctx.moveTo(x0 + (x1 - x0) * 0.18, y); ctx.lineTo(x1 - (x1 - x0) * 0.18, y); }
-    else { ctx.moveTo(x0 + (x1 - x0) * 0.18, y); ctx.lineTo(x1 - (x1 - x0) * 0.10, y - 44); }
-    ctx.stroke();
-    ctx.restore();
+    var a0 = [x0 + (x1 - x0) * 0.18, y];
+    var a1 = closed ? [x1 - (x1 - x0) * 0.18, y] : [x1 - (x1 - x0) * 0.10, y - 44];
+    poly(ctx, [a0, a1], C.wire, 3.6);
     dot(ctx, x0 + (x1 - x0) * 0.18, y, 5, C.wire);
     dot(ctx, x1 - (x1 - x0) * 0.18, y, 5, C.wire);
     if (name) txt(ctx, (x0 + x1) / 2, y - 66, name, C.sub, 15, 700, 'center');
@@ -501,6 +507,7 @@
 
   g.RENDER = { W: W, H: H, C: C, fmt: fmt, panel: null, scenes: {} };
   g.RENDER.geo = { reset: geoReset, data: function () { return GEO; } };
+  g.RENDER.FLOW_SPEED = FLOW_SPEED;
   g.RENDER.U = {
     rrect: rrect, line: line, poly: poly, txt: txt, mono: mono, dot: dot, arrow: arrow,
     flow: flow, batteryV: batteryV, resistorV: resistorV, resistorH: resistorH, lamp: lamp,
@@ -520,6 +527,12 @@
     if (sub) U.txt(ctx, 60, 100, sub, C.sub, 17, 400);
   }
   function panel(o) { g.RENDER.panel = o; }
+
+  function SPEED(lo, hi, cur) {
+    var v = cur < lo ? lo : (cur > hi ? hi : cur);
+    g.RENDER.GEO_SP = v;
+    return v;
+  }
 
   var K = {
     bat: function (ctx, x, y, label, emf, sub) {
@@ -576,9 +589,9 @@
       lampT.push(lp);
     }
     if (st.anim) {
-      var sp = Math.max(.3, Math.min(1.6, L.It / 2.2));
-      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [lastX, top]], st.phase * sp, C.gold, 72, 5);
-      U.flow(ctx, [[lastX, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 72, 5);
+      var sp = SPEED(.45, 1.8, L.It / 1.1);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [lastX, top]], st.phase * sp, C.gold, 40, 6.2);
+      U.flow(ctx, [[lastX, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 40, 6.2);
     }
 
     var cx = 1270, cy = 700, barMax = 300, mx = Math.max(L.P1, L.PL) * 1.3;
@@ -635,9 +648,9 @@
       U.txt(ctx, cx, 800, name, C.white, 20, 700, 'center');
       U.txt(ctx, cx, 838, itxt, C.sub, 16, 400, 'center');
       if (st.anim) {
-        var sp = Math.max(.25, Math.min(1.3, I / 1.2));
-        U.flow(ctx, [[lx, top], [rx, top]], st.phase * sp, C.gold, 66, 4.6);
-        U.flow(ctx, [[rx, bot], [lx, bot]], st.phase * sp, C.gold, 66, 4.6);
+        var sp = SPEED(.45, 1.8, I / 0.3);
+        U.flow(ctx, [[lx, top], [rx, top]], st.phase * sp, C.gold, 50, 5.2);
+        U.flow(ctx, [[rx, bot], [lx, bot]], st.phase * sp, C.gold, 50, 5.2);
       }
     }
     one(390, [['新电池', 'E = 1.5 V', 'r = 0.5 Ω']], P1, '① 一节新电池',
@@ -773,9 +786,9 @@
     K.w(ctx, [rx, bot], res.b);
 
     if (st.anim) {
-      var sp = Math.max(.25, Math.min(1.6, I / 2));
-      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [rx, top], res.t], st.phase * sp, C.gold, 64, 4.8);
-      U.flow(ctx, [[rx, bot], res.b, [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 64, 4.8);
+      var sp = SPEED(.45, 1.8, I / 1.0);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [rx, top], res.t], st.phase * sp, C.gold, 48, 5.4);
+      U.flow(ctx, [res.b, [rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 48, 5.4);
     }
 
     var px0 = 980, px1 = 1520, base = 830, hi = 300;
@@ -870,10 +883,10 @@
     U.mono(ctx, mx, top + 70, F(I, 2) + ' A', C.goldL, 19, 700, 'center');
 
     if (st.anim) {
-      var sp = Math.max(.2, Math.min(1.6, I / 2.2));
-      U.flow(ctx, [[bx, bat.t[1]], [bx, top], amp.l], st.phase * sp, C.gold, 64, 4.8);
-      U.flow(ctx, [amp.r, [rx, top], res.t], st.phase * sp, C.gold, 64, 4.8);
-      U.flow(ctx, [res.b, [rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 64, 4.8);
+      var sp = SPEED(.45, 1.8, I / 1.0);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], amp.l], st.phase * sp, C.gold, 48, 5.4);
+      U.flow(ctx, [amp.r, [rx, top], res.t], st.phase * sp, C.gold, 48, 5.4);
+      U.flow(ctx, [res.b, [rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 48, 5.4);
     }
 
     var gx = 940, gy = 400, gw = 560, tot = R + r;
@@ -940,9 +953,9 @@
     U.mono(ctx, vmx, vmy + vr + 34, F(Uo, 2) + ' V', C.goldL, 21, 700, 'center');
 
     if (st.anim) {
-      var sp = Math.max(.2, Math.min(1.6, I / 2.2));
-      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [rx, top], res.t], st.phase * sp, C.gold, 64, 4.8);
-      U.flow(ctx, [res.b, [rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 64, 4.8);
+      var sp = SPEED(.45, 1.8, I / 1.0);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], [rx, top], res.t], st.phase * sp, C.gold, 48, 5.4);
+      U.flow(ctx, [res.b, [rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 48, 5.4);
     }
 
     var gx = 990, gy = 340, gw = 520;
@@ -1063,10 +1076,10 @@
     U.mono(ctx, mx, top + 66, F(I, 3) + ' A', shorted ? C.red : C.goldL, 19, 700, 'center');
 
     if (st.anim && I > 0) {
-      var sp = Math.max(.3, Math.min(2, I / 2.2));
-      U.flow(ctx, [[bx, bat.t[1]], [bx, top], amp.l], st.phase * sp, C.gold, 60, 5);
-      U.flow(ctx, [amp.r, sw.l, sw.r, [rx, top]], st.phase * sp, C.gold, 60, 5);
-      U.flow(ctx, [[rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 60, 5);
+      var sp = SPEED(.45, 2.2, I / 1.0);
+      U.flow(ctx, [[bx, bat.t[1]], [bx, top], amp.l], st.phase * sp, C.gold, 46, 5.6);
+      U.flow(ctx, [amp.r, sw.l, sw.r, [rx, top]], st.phase * sp, C.gold, 46, 5.6);
+      U.flow(ctx, [[rx, bot], [bx, bot], [bx, bat.b[1]]], st.phase * sp, C.gold, 46, 5.6);
     }
 
     var tx = 1080;
@@ -1519,8 +1532,26 @@
     var nRoots = Object.keys(roots).length;
     if (wires.length && nRoots > 1) bad.push('导线分成 ' + nRoots + ' 段互不相连');
 
+    var offWires = 0;
+    (g2.dots || []).forEach(function (pt) {
+      var best = 1e9;
+      wires.forEach(function (wl) {
+        for (var j = 1; j < wl.length; j++) {
+          var x1 = wl[j - 1][0], y1 = wl[j - 1][1], x2 = wl[j][0], y2 = wl[j][1];
+          var dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy;
+          var t = L2 ? ((pt[0] - x1) * dx + (pt[1] - y1) * dy) / L2 : 0;
+          t = t < 0 ? 0 : (t > 1 ? 1 : t);
+          var dd = Math.sqrt(Math.pow(pt[0] - (x1 + dx * t), 2) + Math.pow(pt[1] - (y1 + dy * t), 2));
+          if (dd < best) best = dd;
+        }
+      });
+      if (best > 6) offWires++;
+    });
+    if (offWires) bad.push(offWires + ' 个电流点跑出了导线');
+
     return { pass: bad.length === 0, wires: wires.length, terminals: g2.terms.length,
-             idleTerminals: idle, bodies: g2.bodies.length, components: nRoots, problems: bad.slice(0, 6) };
+             idleTerminals: idle, dots: (g2.dots || []).length, offWires: offWires,
+             bodies: g2.bodies.length, components: nRoots, problems: bad.slice(0, 6) };
   }
 
   g.__viz = {
@@ -1574,12 +1605,18 @@
       return h.toString(16);
     },
     box: function () { return { w: cw, h: chh, k: K }; },
-    wiringAudit: wiringAudit
+    wiringAudit: wiringAudit,
+    phaseNow: function () { return phase; },
+    flowSpeed: function () { return R.FLOW_SPEED; }
   };
 
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function loop() {
-    if (!reduce && animOn) { phase += 0.006; draw(); }
+  var lastT = null;
+  function loop(now) {
+    if (lastT == null) lastT = now;
+    var dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+    if (!reduce && animOn) { phase += dt; draw(); }
     requestAnimationFrame(loop);
   }
 
